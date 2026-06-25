@@ -1826,6 +1826,9 @@ function roomIsReady() {
     if (isMobileDevice) {
         hide(initVideoAudioRefreshButton);
         BUTTONS.main.swapCameraButton && show(swapCameraButton);
+        if (navigator.mediaDevices.getDisplayMedia && BUTTONS.main.startScreenButton) {
+            show(startScreenButton);
+        }
         rc.chatMaximize();
         hide(chatTogglePin);
         hide(chatMaxButton);

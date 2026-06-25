@@ -5048,6 +5048,61 @@ class RoomClient {
             pipWindow.document.head.append(pipStylesheet);
             pipWindow.document.body.append(pipVideoContainer);
 
+// ── Custom PiP Buttons ──────────────────────────────
+            const pipControls = pipWindow.document.createElement('div');
+            pipControls.style.cssText = `
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 8px;
+    background: rgba(0,0,0,0.6);
+    position: sticky;
+    bottom: 0;
+`;
+
+// Mute/Unmute button
+            const pipMuteBtn = pipWindow.document.createElement('button');
+            pipMuteBtn.textContent = '🎤 Mute';
+            pipMuteBtn.style.cssText = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #333; color: white;`;
+            pipMuteBtn.onclick = () => {
+                if (audio) {
+                    stopAudioButton.click();
+                    pipMuteBtn.textContent = '🔇 Unmuted';
+                } else {
+                    startAudioButton.click();
+                    pipMuteBtn.textContent = '🎤 Mute';
+                }
+            };
+
+// Camera toggle button
+            const pipCamBtn = pipWindow.document.createElement('button');
+            pipCamBtn.textContent = '📷 Cam Off';
+            pipCamBtn.style.cssText = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #333; color: white;`;
+            pipCamBtn.onclick = () => {
+                if (video) {
+                    stopVideoButton.click();
+                    pipCamBtn.textContent = '📷 Cam On';
+                } else {
+                    startVideoButton.click();
+                    pipCamBtn.textContent = '📷 Cam Off';
+                }
+            };
+
+// Leave button
+            const pipLeaveBtn = pipWindow.document.createElement('button');
+            pipLeaveBtn.textContent = '📴 Leave';
+            pipLeaveBtn.style.cssText = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #c0392b; color: white;`;
+            pipLeaveBtn.onclick = () => {
+                rc.documentPictureInPictureClose();
+                leaveRoom();
+            };
+
+            pipControls.appendChild(pipMuteBtn);
+            pipControls.appendChild(pipCamBtn);
+            pipControls.appendChild(pipLeaveBtn);
+            pipWindow.document.body.appendChild(pipControls);
+// ────────────────────────────────────────────────────
+
             function cloneVideoElements() {
                 let foundVideo = false;
 
