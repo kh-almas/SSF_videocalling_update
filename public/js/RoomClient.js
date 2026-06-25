@@ -5048,50 +5048,57 @@ class RoomClient {
             pipWindow.document.head.append(pipStylesheet);
             pipWindow.document.body.append(pipVideoContainer);
 
-// ── Custom PiP Buttons ──────────────────────────────
+// ── Set up flex layout on PiP body ──────────────────
+            pipWindow.document.body.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: var(--body-bg);
+`;
+
+            pipVideoContainer.style.flex = '1';
+            pipVideoContainer.style.overflow = 'hidden auto';
+            pipVideoContainer.style.minHeight = '0';
+
+            pipWindow.document.head.append(pipStylesheet);
+            pipWindow.document.body.append(pipVideoContainer);
+
+// ── Controls bar pinned to bottom ───────────────────
             const pipControls = pipWindow.document.createElement('div');
             pipControls.style.cssText = `
     display: flex;
     gap: 8px;
     justify-content: center;
+    align-items: center;
     padding: 8px;
-    background: rgba(0,0,0,0.6);
-    position: sticky;
-    bottom: 0;
+    background: rgba(0,0,0,0.7);
+    flex-shrink: 0;
 `;
 
-// Mute/Unmute button
+            const btnStyle = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #333; color: white; font-size: 13px;`;
+
             const pipMuteBtn = pipWindow.document.createElement('button');
-            pipMuteBtn.textContent = '🎤 Mute';
-            pipMuteBtn.style.cssText = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #333; color: white;`;
+            pipMuteBtn.textContent = audio ? '🎤 Mute' : '🔇 Unmuted';
+            pipMuteBtn.style.cssText = btnStyle;
             pipMuteBtn.onclick = () => {
-                if (audio) {
-                    stopAudioButton.click();
-                    pipMuteBtn.textContent = '🔇 Unmuted';
-                } else {
-                    startAudioButton.click();
-                    pipMuteBtn.textContent = '🎤 Mute';
-                }
+                audio ? stopAudioButton.click() : startAudioButton.click();
+                pipMuteBtn.textContent = audio ? '🔇 Unmuted' : '🎤 Mute';
             };
 
-// Camera toggle button
             const pipCamBtn = pipWindow.document.createElement('button');
-            pipCamBtn.textContent = '📷 Cam Off';
-            pipCamBtn.style.cssText = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #333; color: white;`;
+            pipCamBtn.textContent = video ? '📷 Cam Off' : '📷 Cam On';
+            pipCamBtn.style.cssText = btnStyle;
             pipCamBtn.onclick = () => {
-                if (video) {
-                    stopVideoButton.click();
-                    pipCamBtn.textContent = '📷 Cam On';
-                } else {
-                    startVideoButton.click();
-                    pipCamBtn.textContent = '📷 Cam Off';
-                }
+                video ? stopVideoButton.click() : startVideoButton.click();
+                pipCamBtn.textContent = video ? '📷 Cam On' : '📷 Cam Off';
             };
 
-// Leave button
             const pipLeaveBtn = pipWindow.document.createElement('button');
             pipLeaveBtn.textContent = '📴 Leave';
-            pipLeaveBtn.style.cssText = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #c0392b; color: white;`;
+            pipLeaveBtn.style.cssText = btnStyle + 'background: #c0392b;';
             pipLeaveBtn.onclick = () => {
                 rc.documentPictureInPictureClose();
                 leaveRoom();
