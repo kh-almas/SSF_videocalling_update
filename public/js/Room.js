@@ -1613,7 +1613,7 @@ async function shareRoom(useNavigator = false) {
                     roomUrl: RoomURL,
                 },
             }),
-            showDenyButton: true,
+            showDenyButton: false,
             showCancelButton: true,
             cancelButtonColor: 'red',
             denyButtonColor: 'green',
