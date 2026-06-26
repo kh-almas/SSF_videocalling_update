@@ -1826,9 +1826,6 @@ function roomIsReady() {
     if (isMobileDevice) {
         hide(initVideoAudioRefreshButton);
         BUTTONS.main.swapCameraButton && show(swapCameraButton);
-        if (navigator.mediaDevices.getDisplayMedia && BUTTONS.main.startScreenButton) {
-            show(startScreenButton);
-        }
         rc.chatMaximize();
         hide(chatTogglePin);
         hide(chatMaxButton);
@@ -4386,7 +4383,7 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        showDenyButton: true,
+        showDenyButton: false,
         showCancelButton: allowCancel,
         confirmButtonColor: 'green',
         denyButtonColor: 'red',
@@ -4395,7 +4392,7 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         imageUrl: image.feedback,
         position: 'top',
         title: 'Leave a feedback',
-        text: 'Do you want to rate your MiroTalk experience?',
+        text: 'Thank you for using SSF Videocalling service',
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
         cancelButtonText: `Cancel`,
@@ -4403,9 +4400,7 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
-            endRoomSession();
-            rc.exitRoom(disconnectAll);
-            openURL(survey.url);
+            redirectOnLeave(disconnectAll);
         } else if (result.isDenied) {
             redirectOnLeave(disconnectAll);
         }
