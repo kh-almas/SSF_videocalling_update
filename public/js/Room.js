@@ -4391,7 +4391,7 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         background: swalBackground,
         imageUrl: image.feedback,
         position: 'top',
-        title: 'Leave a feedback',
+        title: 'All Wrapped Up!',
         text: 'Thank you for using SSF Videocalling service',
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
