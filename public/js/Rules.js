@@ -130,9 +130,20 @@ let BUTTONS = {
     //...
 };
 
+let ORIGINAL_BUTTONS = JSON.parse(JSON.stringify(BUTTONS));
+
+function setOriginalButtons() {
+    ORIGINAL_BUTTONS = JSON.parse(JSON.stringify(BUTTONS));
+}
+
+function resetButtons() {
+    BUTTONS = JSON.parse(JSON.stringify(ORIGINAL_BUTTONS));
+}
+
 function handleRules(isPresenter) {
     console.log('07.1 ----> IsPresenter: ' + isPresenter);
     if (!isRulesActive) return;
+    resetButtons();
     if (!isPresenter) {
         // ##################################
         // GUEST
@@ -240,11 +251,11 @@ function handleRules(isPresenter) {
     BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
-    !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
-    !BUTTONS.settings.tabNotificationsBtn && hide(tabNotificationsBtn);
-    !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
+    BUTTONS.settings.micOptionsButton ? show(micOptionsButton) : hide(micOptionsButton);
+    BUTTONS.settings.tabNotificationsBtn ? show(tabNotificationsBtn) : hide(tabNotificationsBtn);
+    BUTTONS.settings.tabModerator ? show(tabModeratorBtn) : hide(tabModeratorBtn);
     if (BUTTONS.settings.host_only_recording) {
-        show(recordingImage);
+        show(recordingImage);  
         show(roomRecordingOptions);
         show(roomHostOnlyRecording);
     } else {

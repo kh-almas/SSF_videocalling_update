@@ -6492,6 +6492,19 @@ function getParticipantsList(peers) {
                     })
                 );
 
+
+                if (!peer_info.peer_presenter) {
+                    menuItems += renderParticipantMenuItem(
+                        renderParticipantActionButton({
+                            buttonClass: 'btn-sm ml5',
+                            buttonId: `${peer_id}___makePresenter`,
+                            onClick: `rc.setPresenter(${JSON.stringify(peer_id)}, true)`,
+                            iconHtml: _PEER.presenter,
+                            label: 'Make moderator',
+                        })
+                    );
+                }
+
                 if (BUTTONS.participantsList.geoLocationButton) {
                     menuItems += renderParticipantMenuItem(
                         renderParticipantActionButton({

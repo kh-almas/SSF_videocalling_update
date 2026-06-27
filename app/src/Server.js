@@ -2496,6 +2496,84 @@ function startServer() {
             cb(room.toJson());
         });
 
+
+        socket.on('setPresenter', (dataObject, cb) => {
+            if (!roomExists(socket)) {
+                return cb?.({ error: 'Room does not exist' });
+            }
+
+            const { room, peer } = getRoomAndPeer(socket);
+            if (!room || !peer) {
+                return cb?.({ error: 'Sender not found' });
+            }
+
+            const data = checkXSS(dataObject);
+            const { peer_id, status } = data;
+
+            if (!peer_id) {
+                return cb?.({ error: 'Target peer id is required' });
+            }
+
+            const makePresenter = status === true || status === 'true' || status === '1';
+
+            const senderIsPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info.peer_name,
+                peer.peer_info.peer_uuid
+            );
+
+            if (!senderIsPresenter) {
+                return cb?.({ error: 'Only presenter can change moderator role' });
+            }
+
+            if (peer_id === socket.id) {
+                return cb?.({ error: 'You are already moderator' });
+            }
+
+            const targetPeer = room.getPeer(peer_id);
+            if (!targetPeer) {
+                return cb?.({ error: 'Target peer not found' });
+            }
+
+            if (!(socket.room_id in presenters)) {
+                presenters[socket.room_id] = {};
+            }
+
+            if (makePresenter) {
+                presenters[socket.room_id][peer_id] = {
+                    peer_ip: '',
+                    peer_name: targetPeer.peer_info.peer_name,
+                    peer_uuid: targetPeer.peer_info.peer_uuid,
+                    is_presenter: true,
+                };
+            } else {
+                delete presenters[socket.room_id][peer_id];
+            }
+
+            targetPeer.updatePeerInfo({
+                type: 'presenter',
+                status: makePresenter,
+            });
+
+            const payload = {
+                peer_id,
+                peer_name: targetPeer.peer_info.peer_name,
+                type: 'presenter',
+                status: makePresenter,
+                peer_presenter: makePresenter,
+            };
+
+            room.sendTo(peer_id, 'presenterChanged', payload);
+
+            room.broadCast(socket.id, 'updatePeerInfo', {
+                ...payload,
+                broadcast: true,
+            });
+
+            cb?.({ ok: true, presenter: makePresenter });
+        });
+
         socket.on('getRouterRtpCapabilities', (_, callback) => {
             if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });

@@ -1259,6 +1259,18 @@ class RoomClient {
         this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
         this.socket.on('followMe', this.handleFollowMeData);
         this.socket.on('chatReaction', this.handleChatReaction);
+        this.socket.on('presenterChanged', (data) => {
+            if (data.peer_id !== this.peer_id) return;
+
+            isPresenter = data.status;
+            this.peer_info.peer_presenter = data.status;
+            this.getId('isUserPresenter').innerText = data.status;
+
+            handleRules(isPresenter);
+            getRoomParticipants();
+
+            this.userLog('success', 'You are now moderator', 'top-end');
+        });
     }
 
     // ####################################################
@@ -5820,6 +5832,28 @@ class RoomClient {
             active: isVideoPrivacyActive,
             broadcast: true,
         });
+    }
+
+    setPresenter(peer_id, status = true) {
+        if (!isPresenter) {
+            return this.userLog('warning', 'Only the presenter can make another user moderator', 'top-end');
+        }
+
+        this.socket.emit(
+            'setPresenter',
+            {
+                peer_id,
+                status,
+            },
+            (res) => {
+                if (res?.error) {
+                    return this.userLog('warning', res.error, 'top-end');
+                }
+
+                this.userLog('success', 'User is now moderator', 'top-end');
+                getRoomParticipants();
+            }
+        );
     }
 
     setVideoPrivacyStatus(elemName, privacy) {
@@ -11923,6 +11957,14 @@ class RoomClient {
                     break;
                 case 'screen':
                     this.setIsScreen(status);
+                    break;
+                case 'presenter':
+                    if (peer_id === this.peer_id) {
+                        isPresenter = status;
+                        this.peer_info.peer_presenter = status;
+                        this.getId('isUserPresenter').innerText = status;
+                        handleRules(isPresenter);
+                    }
                     break;
                 case 'hand':
                     this.peer_info.peer_hand = status;
