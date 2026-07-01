@@ -196,9 +196,17 @@ function handleRules(isPresenter) {
         rc.roomAction('broadcasting', true, false);
         if (isBroadcastingEnabled) rc.toggleRoomBroadcasting();
         // Room lobby
-        isLobbyEnabled = localStorageSettings.lobby;
-        switchLobby.checked = isLobbyEnabled;
-        rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
+        // Room lobby
+        const isBreakoutRoom = room_id.includes('_breakout_');
+
+        if (!isBreakoutRoom) {
+            isLobbyEnabled = localStorageSettings.lobby;
+            switchLobby.checked = isLobbyEnabled;
+            rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
+        } else {
+            isLobbyEnabled = false;
+            switchLobby.checked = false;
+        }
         // Room host-only-recording
         hostOnlyRecording = localStorageSettings.host_only_recording;
         switchHostOnlyRecording.checked = hostOnlyRecording;

@@ -2427,7 +2427,9 @@ function startServer() {
                 return cb('isLocked');
             }
 
-            if ((room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
+            const isBreakoutRoomCheck = socket.room_id.includes('_breakout_');
+
+            if (!isBreakoutRoomCheck && (room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
                 log.debug(
                     'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter'
                 );
