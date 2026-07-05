@@ -506,16 +506,20 @@ class RoomClient {
         // CREATE ROOM AND JOIN
         // ####################################################
 
-        this.createRoom(this.room_id).then(async () => {
-            const data = {
-                room_id: this.room_id,
-                peer_info: this.peer_info,
-            };
-            await this.join(data);
-            this.initSockets();
-            this._isConnected = true;
-            successCallback();
-        });
+        this.createRoom(this.room_id)
+            .then(async () => {
+                const data = {
+                    room_id: this.room_id,
+                    peer_info: this.peer_info,
+                };
+                await this.join(data);
+                this.initSockets();
+                this._isConnected = true;
+                successCallback();
+            })
+            .catch((err) => {
+                this.roomCreateDenied(err);
+            });
     }
 
     // ####################################################
@@ -523,14 +527,11 @@ class RoomClient {
     // ####################################################
 
     async createRoom(room_id) {
-        await this.socket
-            .request('createRoom', {
-                room_id,
-            })
-            .catch((err) => {
-                console.log('Create room:', err);
-            });
-    }
+        return await this.socket.request('createRoom', {
+            room_id,
+            peer_token: this.peer_info?.peer_token || '',
+        });
+    }s
 
     async join(data) {
         this.socket
@@ -10236,6 +10237,24 @@ class RoomClient {
             // Login required to join room
             endRoomSession();
             openURL(`/login/?room=${this.room_id}`);
+        });
+    }
+
+    roomCreateDenied(message) {
+        this.sound('alert');
+
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.forbidden,
+            title: 'Room creation denied',
+            text: message || 'Only admin can create rooms',
+            confirmButtonText: `OK`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            openURL(`/`);
         });
     }
 
