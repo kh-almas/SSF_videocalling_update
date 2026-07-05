@@ -2257,7 +2257,7 @@ function startServer() {
                         log.warn('[createRoom] - Non-admin tried to create room', { username, room_id });
                         return callback({ error: 'Only admin can create rooms' });
                     }
-                } catch (
+                } catch (err) {
                     return callback({ error: 'Only admin can create rooms' });
                 }
             }
