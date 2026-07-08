@@ -231,6 +231,9 @@ const exitMenu = getId('exitMenu');
 const exitLeaveBtn = getId('exitLeaveBtn');
 const exitLeaveAllBtn = getId('exitLeaveAllBtn');
 
+const roomNameBadge = getId('roomNameBadge');
+const roomNameBadgeText = getId('roomNameBadgeText');
+
 // ####################################################
 // VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
 // ####################################################
@@ -1743,6 +1746,16 @@ function joinRoom(peer_name, room_id) {
         console.log('05 ----> join Room ' + room_id);
         roomId.innerText = room_id;
         userName.innerText = peer_name;
+
+        if (roomNameBadgeText) {
+            roomNameBadgeText.innerText = room_id;
+        }
+
+        if (roomNameBadge) {
+            roomNameBadge.classList.remove('hidden');
+            roomNameBadge.style.display = 'flex';
+        }
+
         isUserPresenter.innerText = isPresenter;
         rc = new RoomClient(
             localAudio,
@@ -4541,6 +4554,9 @@ function showButtons() {
         return;
     bottomButtons.style.display = 'flex';
     toggleClassElements('username', 'flex');
+
+    if (roomNameBadge) roomNameBadge.style.display = 'flex';
+
     isButtonsVisible = true;
 }
 
@@ -4548,11 +4564,13 @@ function checkButtonsBar() {
     if (localStorageSettings.keep_buttons_visible) {
         bottomButtons.style.display = 'flex';
         toggleClassElements('username', 'flex');
+        if (roomNameBadge) roomNameBadge.style.display = 'flex';
         isButtonsVisible = true;
     } else {
         if (!isButtonsBarOver) {
             bottomButtons.style.display = 'none';
             toggleClassElements('username', 'none');
+            if (roomNameBadge) roomNameBadge.style.display = 'none';
             isButtonsVisible = false;
         }
     }
@@ -7015,7 +7033,7 @@ function adaptAspectRatio(participantsCount) {
             : elemDisplay('participantsCountBadge', false);
     }
 
-    /* 
+    /*
         ['0:0', '4:3', '16:9', '1:1', '1:2'];
     */
     let desktop,

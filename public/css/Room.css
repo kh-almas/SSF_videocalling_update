@@ -6019,3 +6019,41 @@ z-index:
     - 8 send receive progress
     - 9 room/user emoji
 */
+
+.room-name-badge {
+    position: fixed;
+    left: 18px;
+    bottom: 18px;
+    z-index: 999;
+    display: none;
+    align-items: center;
+    gap: 8px;
+
+    max-width: 260px;
+    padding: 8px 14px;
+    border-radius: 10px;
+
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    pointer-events: none;
+}
+
+.room-name-badge i {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.room-name-badge span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
