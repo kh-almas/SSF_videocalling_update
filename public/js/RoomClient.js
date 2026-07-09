@@ -682,9 +682,14 @@ class RoomClient {
         for (let peer of Array.from(this.peers.keys()).filter((id) => id == this.peer_id)) {
             let my_peer_info = this.peers.get(peer).peer_info;
             console.log('07.1 ----> My Peer info', my_peer_info);
-            isPresenter = window.localStorage.isReconnected === 'true' ? isPresenter : my_peer_info.peer_presenter;
-            this.peer_info.peer_presenter = isPresenter;
-            this.getId('isUserPresenter').innerText = isPresenter;
+            const serverPresenter =
+                my_peer_info.peer_presenter === true ||
+                my_peer_info.peer_presenter === 'true' ||
+                my_peer_info.peer_presenter === '1';
+
+            isPresenter = serverPresenter;
+            this.peer_info.peer_presenter = serverPresenter;
+            this.getId('isUserPresenter').innerText = String(serverPresenter);
             window.localStorage.isReconnected = false;
 
             // GLOBAL LOBBY ENABLED
@@ -1951,7 +1956,7 @@ class RoomClient {
 
     getReconnectDirectJoinURL() {
         const sfu_peer_info = this.getPeerInfoFromLocalStorage();
-        const { peer_presenter, peer_audio, peer_video, peer_screen, peer_token } = sfu_peer_info
+        const { peer_audio, peer_video, peer_screen, peer_token } = sfu_peer_info
             ? sfu_peer_info
             : this.peer_info;
         const baseUrl = `${window.location.origin}/join`;
@@ -1963,7 +1968,6 @@ class RoomClient {
             video: peer_video,
             screen: peer_screen,
             notify: 0,
-            isPresenter: peer_presenter || isPresenter,
         };
         if (peer_token) queryParams.token = peer_token;
         const url = `${baseUrl}?${Object.entries(queryParams)

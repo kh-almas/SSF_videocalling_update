@@ -279,7 +279,7 @@ let isScreenAllowed = getScreen();
 let isHideMeActive = getHideMeActive();
 let notify = getNotify();
 let chat = getChat();
-isPresenter = isPeerPresenter();
+isPresenter = false;
 
 let peer_info = null;
 
@@ -967,16 +967,8 @@ function getHideMeActive() {
 }
 
 function isPeerPresenter() {
-    let presenter = getQueryParam('isPresenter');
-    if (presenter) {
-        presenter = presenter.toLowerCase();
-        let queryPresenter = presenter === '1' || presenter === 'true';
-        if (queryPresenter != null) {
-            console.log('Direct join Reconnect', { isPresenter: queryPresenter });
-            return queryPresenter;
-        }
-    }
-    console.log('Direct join Reconnect', { presenter: false });
+    // Disabled intentionally.
+    // A user can edit URL query params, so frontend must not decide moderator role.
     return false;
 }
 
@@ -1145,7 +1137,9 @@ function getPeerInfo() {
         peer_name: peer_name,
         peer_avatar: peer_avatar,
         peer_token: peer_token,
-        peer_presenter: isPresenter,
+        // Do not send frontend moderator state to server.
+        // Server will decide if this peer is presenter/moderator.
+        peer_presenter: false,
         peer_audio: isAudioAllowed,
         peer_audio_volume: 100,
         peer_video: isVideoAllowed,

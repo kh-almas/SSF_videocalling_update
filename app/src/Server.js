@@ -467,6 +467,7 @@ const authHost = new Host(); // Authenticated IP by Login
 
 const roomList = new Map(); // All Rooms
 
+// presenters[room_id][peer_uuid] = presenter info
 const presenters = {}; // Collect presenters grp by roomId
 
 const streams = {}; // Collect all rtmp streams
@@ -2316,7 +2317,7 @@ function startServer() {
                 browser_version,
             } = data.peer_info;
 
-            let is_presenter = peer_presenter;
+            let is_presenter =false;
 
             // User Auth required or detect token, we check if peer valid
             if (hostCfg.user_auth || peer_token) {
@@ -2402,6 +2403,8 @@ function startServer() {
                 room.removePeer(socket.id);
             }
 
+            const peersCountBeforeJoin = room.getPeersCount();
+
             room.addPeer(new Peer(socket.id, data));
 
             const activeRooms = getActiveRooms();
@@ -2427,22 +2430,27 @@ function startServer() {
              * For breakout rooms, skip join_first rule - only presenters.list or token-based presenters are valid
              */
             const isBreakoutRoom = socket.room_id.includes('_breakout_');
+            const alreadyApprovedPresenter = !!presenters[socket.room_id][peer_uuid];
+
             if (
+                alreadyApprovedPresenter ||
                 hostCfg?.presenters?.list?.includes(peer_name) ||
                 (!isBreakoutRoom &&
                     hostCfg?.presenters?.join_first &&
-                    Object.keys(presenters[socket.room_id]).length === 0) ||
-                (peer_token && is_presenter)
+                    peersCountBeforeJoin === 0)
             ) {
                 presenter.is_presenter = true;
-                presenters[socket.room_id][socket.id] = presenter;
+                presenters[socket.room_id][peer_uuid] = presenter;
             }
 
             log.debug('[Join] - Connected presenters grp by roomId', presenters);
 
-            const isPresenter = peer_token
-                ? is_presenter
-                : isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer_name,
+                peer_uuid
+            );
 
             const peer = room.getPeer(socket.id);
 
@@ -2580,15 +2588,19 @@ function startServer() {
                 presenters[socket.room_id] = {};
             }
 
+            const targetPeerUUID = targetPeer.peer_info.peer_uuid;
+
             if (makePresenter) {
-                presenters[socket.room_id][peer_id] = {
+                presenters[socket.room_id][targetPeerUUID] = {
                     peer_ip: '',
                     peer_name: targetPeer.peer_info.peer_name,
-                    peer_uuid: targetPeer.peer_info.peer_uuid,
+                    peer_uuid: targetPeerUUID,
                     is_presenter: true,
+                    granted_by: peer.peer_info.peer_uuid,
+                    granted_at: Date.now(),
                 };
             } else {
-                delete presenters[socket.room_id][peer_id];
+                delete presenters[socket.room_id][targetPeerUUID];
             }
 
             targetPeer.updatePeerInfo({
@@ -4742,8 +4754,14 @@ function startServer() {
             }
 
             // Clean up this peer's presenter entry immediately
-            if (socket.room_id in presenters && socket.id in presenters[socket.room_id]) {
-                delete presenters[socket.room_id][socket.id];
+            if (room.getPeersCount() === 0) {
+                stopRTMPActiveStreams(isPresenter, room);
+
+                roomList.delete(socket.room_id);
+
+                delete presenters[socket.room_id];
+
+                log.debug('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
             }
 
             if (room.getPeersCount() === 0) {
@@ -4805,9 +4823,14 @@ function startServer() {
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
-            // Clean up this peer's presenter entry immediately
-            if (socket.room_id in presenters && socket.id in presenters[socket.room_id]) {
-                delete presenters[socket.room_id][socket.id];
+            if (room.getPeersCount() === 0) {
+                stopRTMPActiveStreams(isPresenter, room);
+
+                roomList.delete(socket.room_id);
+
+                delete presenters[socket.room_id];
+
+                log.debug('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
             }
 
             if (room.getPeersCount() === 0) {
@@ -5001,44 +5024,54 @@ function startServer() {
 
     function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
         try {
-            // 1. Direct lookup by peer_id (server-assigned socket.id — not user-controlled)
-            const storedPresenter = presenters[room_id]?.[peer_id];
+            if (!room_id || !peer_uuid) return false;
+
+            if (!(room_id in presenters)) {
+                presenters[room_id] = {};
+            }
+
+            // 1. Manual moderator / approved presenter check by peer_uuid.
+            // peer_uuid survives reconnect, socket.id does not.
+            const storedPresenter = presenters[room_id]?.[peer_uuid];
+
             if (storedPresenter) {
                 const isPresenter =
-                    storedPresenter.peer_name === peer_name &&
                     storedPresenter.peer_uuid === peer_uuid &&
                     storedPresenter.is_presenter === true;
 
-                log.debug('isPeerPresenter Check (stored)', {
-                    room_id: room_id,
-                    peer_id: peer_id,
-                    peer_name: peer_name,
-                    peer_uuid: peer_uuid,
-                    isPresenter: isPresenter,
+                log.debug('isPeerPresenter Check (peer_uuid)', {
+                    room_id,
+                    peer_id,
+                    peer_name,
+                    peer_uuid,
+                    isPresenter,
                 });
 
                 return isPresenter;
             }
 
-            // 2. Static presenter list — verify against server-side registered name, not user input
+            // 2. Static presenter list from config.
+            // This is server-side config, so it is trusted.
             const room = roomList.get(room_id);
             const peer = room?.getPeer(peer_id);
+
             if (peer && hostCfg?.presenters?.list?.includes(peer.peer_info.peer_name)) {
                 log.debug('isPeerPresenter Check (static list)', {
-                    room_id: room_id,
-                    peer_id: peer_id,
+                    room_id,
+                    peer_id,
                     peer_name: peer.peer_info.peer_name,
+                    peer_uuid,
                     isPresenter: true,
                 });
+
                 return true;
             }
 
-            // 3. Not a presenter
             log.debug('isPeerPresenter Check (denied)', {
-                room_id: room_id,
-                peer_id: peer_id,
-                peer_name: peer_name,
-                peer_uuid: peer_uuid,
+                room_id,
+                peer_id,
+                peer_name,
+                peer_uuid,
                 isPresenter: false,
             });
 
