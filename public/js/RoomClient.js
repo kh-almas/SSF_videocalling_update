@@ -5083,48 +5083,290 @@ class RoomClient {
             pipWindow.document.head.append(pipStylesheet);
             pipWindow.document.body.append(pipVideoContainer);
 
+// ── Font Awesome inside the PiP window ──────────────
+            const mainFontAwesome = document.querySelector(
+                'link[href*="font-awesome"], link[href*="fontawesome"]'
+            );
+
+            if (mainFontAwesome) {
+                pipWindow.document.head.appendChild(mainFontAwesome.cloneNode(true));
+            }
+
 // ── Controls bar pinned to bottom ───────────────────
             const pipControls = pipWindow.document.createElement('div');
+
             pipControls.style.cssText = `
     display: flex;
-    gap: 8px;
+    gap: 10px;
     justify-content: center;
     align-items: center;
-    padding: 8px;
-    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.78);
     flex-shrink: 0;
 `;
 
-            const btnStyle = `padding: 6px 12px; border-radius: 6px; border: none; cursor: pointer; background: #333; color: white; font-size: 13px;`;
+            const createPipIconButton = () => {
+                const button = pipWindow.document.createElement('button');
 
-            const pipMuteBtn = pipWindow.document.createElement('button');
-            pipMuteBtn.textContent = audio ? '🎤 Mute' : '🔇 Unmuted';
-            pipMuteBtn.style.cssText = btnStyle;
-            pipMuteBtn.onclick = () => {
-                audio ? stopAudioButton.click() : startAudioButton.click();
-                pipMuteBtn.textContent = audio ? '🔇 Unmuted' : '🎤 Mute';
+                button.type = 'button';
+
+                button.style.cssText = `
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: #333;
+        color: #ffffff;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 17px;
+        transition:
+            opacity 0.2s ease,
+            background-color 0.2s ease,
+            transform 0.15s ease;
+    `;
+
+                button.onmouseenter = () => {
+                    if (!button.disabled) {
+                        button.style.transform = 'scale(1.08)';
+                    }
+                };
+
+                button.onmouseleave = () => {
+                    button.style.transform = 'scale(1)';
+                };
+
+                return button;
             };
 
-            const pipCamBtn = pipWindow.document.createElement('button');
-            pipCamBtn.textContent = video ? '📷 Cam Off' : '📷 Cam On';
-            pipCamBtn.style.cssText = btnStyle;
-            pipCamBtn.onclick = () => {
-                video ? stopVideoButton.click() : startVideoButton.click();
-                pipCamBtn.textContent = video ? '📷 Cam On' : '📷 Cam Off';
+            const pipAudioBtn = createPipIconButton();
+            const pipCameraBtn = createPipIconButton();
+            const pipScreenBtn = createPipIconButton();
+            const pipLeaveBtn = createPipIconButton();
+
+            pipAudioBtn.setAttribute('aria-label', 'Audio');
+            pipCameraBtn.setAttribute('aria-label', 'Camera');
+            pipScreenBtn.setAttribute('aria-label', 'Screen share');
+            pipLeaveBtn.setAttribute('aria-label', 'Leave room');
+
+// Leave button always uses the same icon as the main exit button.
+            pipLeaveBtn.innerHTML = '<i class="fa-solid fa-phone-slash"></i>';
+            pipLeaveBtn.title = 'Leave room';
+            pipLeaveBtn.style.background = '#c0392b';
+
+            function updatePipButtonState(button, options) {
+                const {
+                    visible,
+                    disabled,
+                    icon,
+                    title,
+                    background = '#333',
+                } = options;
+
+                button.style.display = visible ? 'inline-flex' : 'none';
+                button.disabled = disabled;
+
+                // Do not recreate the icon every 250ms.
+                // Recreating it can cancel an active mouse click.
+                let iconElement = button.querySelector('i');
+
+                if (!iconElement) {
+                    iconElement = pipWindow.document.createElement('i');
+                    button.appendChild(iconElement);
+                }
+
+                if (iconElement.className !== icon) {
+                    iconElement.className = icon;
+                }
+
+                if (button.title !== title) {
+                    button.title = title;
+                    button.setAttribute('aria-label', title);
+                }
+
+                button.style.background = background;
+                button.style.opacity = disabled ? '0.45' : '1';
+                button.style.cursor = disabled ? 'not-allowed' : 'pointer';
+            }
+
+            function syncPipControlButtons() {
+                const moderator = rc.getModerator ? rc.getModerator() : {};
+
+                /*
+                 * AUDIO
+                 * Same current button as the main room:
+                 * audio ON  -> stopAudioButton
+                 * audio OFF -> startAudioButton
+                 */
+                const currentAudioButton = audio
+                    ? stopAudioButton
+                    : startAudioButton;
+
+                const audioBlocked =
+                    !audio && Boolean(moderator.audio_cant_unmute);
+
+                updatePipButtonState(pipAudioBtn, {
+                    visible: Boolean(audio || BUTTONS.main.startAudioButton),
+                    disabled:
+                        !currentAudioButton ||
+                        currentAudioButton.disabled ||
+                        audioBlocked,
+                    icon: audio
+                        ? 'fas fa-microphone'
+                        : 'fas fa-microphone-slash',
+                    title: audio ? 'Mute microphone' : 'Unmute microphone',
+                    background: audio ? '#333' : '#c0392b',
+                });
+
+                /*
+                 * CAMERA
+                 * Same current button as the main room:
+                 * video ON  -> stopVideoButton
+                 * video OFF -> startVideoButton
+                 */
+                const currentVideoButton = video
+                    ? stopVideoButton
+                    : startVideoButton;
+
+                const videoBlocked =
+                    !video && Boolean(moderator.video_cant_unhide);
+
+                updatePipButtonState(pipCameraBtn, {
+                    visible: Boolean(video || BUTTONS.main.startVideoButton),
+                    disabled:
+                        !currentVideoButton ||
+                        currentVideoButton.disabled ||
+                        videoBlocked,
+                    icon: video
+                        ? 'fas fa-video'
+                        : 'fas fa-video-slash',
+                    title: video ? 'Turn camera off' : 'Turn camera on',
+                    background: video ? '#333' : '#c0392b',
+                });
+
+                /*
+                 * SCREEN SHARE
+                 * Same current button as the main room:
+                 * screen ON  -> stopScreenButton
+                 * screen OFF -> startScreenButton
+                 */
+                const currentScreenButton = screen
+                    ? stopScreenButton
+                    : startScreenButton;
+
+                const screenBlocked =
+                    !screen && Boolean(moderator.screen_cant_share);
+
+                const screenSharingSupported = Boolean(
+                    navigator.getDisplayMedia ||
+                    navigator.mediaDevices?.getDisplayMedia
+                );
+
+                updatePipButtonState(pipScreenBtn, {
+                    visible: Boolean(
+                        screen ||
+                        (
+                            BUTTONS.main.startScreenButton &&
+                            screenSharingSupported
+                        )
+                    ),
+                    disabled:
+                        !currentScreenButton ||
+                        currentScreenButton.disabled ||
+                        screenBlocked,
+                    icon: screen
+                        ? 'fas fa-stop-circle'
+                        : 'fas fa-desktop',
+                    title: screen
+                        ? 'Stop screen sharing'
+                        : 'Start screen sharing',
+                    background: screen ? '#d97706' : '#333',
+                });
+
+                /*
+                 * LEAVE
+                 */
+                updatePipButtonState(pipLeaveBtn, {
+                    visible: Boolean(BUTTONS.main.exitButton),
+                    disabled: !exitButton || exitButton.disabled,
+                    icon: 'fa-solid fa-phone-slash',
+                    title: 'Leave room',
+                    background: '#c0392b',
+                });
+            }
+
+// Audio click
+            pipAudioBtn.onclick = () => {
+                syncPipControlButtons();
+
+                if (pipAudioBtn.disabled) return;
+
+                const currentAudioButton = audio
+                    ? stopAudioButton
+                    : startAudioButton;
+
+                currentAudioButton?.click();
+
+                setTimeout(syncPipControlButtons, 100);
             };
 
-            const pipLeaveBtn = pipWindow.document.createElement('button');
-            pipLeaveBtn.textContent = '📴 Leave';
-            pipLeaveBtn.style.cssText = btnStyle + 'background: #c0392b;';
+// Camera click
+            pipCameraBtn.onclick = () => {
+                syncPipControlButtons();
+
+                if (pipCameraBtn.disabled) return;
+
+                const currentVideoButton = video
+                    ? stopVideoButton
+                    : startVideoButton;
+
+                currentVideoButton?.click();
+
+                setTimeout(syncPipControlButtons, 100);
+            };
+
+// Screen-share click
+            pipScreenBtn.onclick = () => {
+                syncPipControlButtons();
+
+                if (pipScreenBtn.disabled) return;
+
+                const currentScreenButton = screen
+                    ? stopScreenButton
+                    : startScreenButton;
+
+                currentScreenButton?.click();
+
+                setTimeout(syncPipControlButtons, 100);
+            };
+
+// Leave click
             pipLeaveBtn.onclick = () => {
+                if (pipLeaveBtn.disabled) return;
+
                 rc.documentPictureInPictureClose();
                 leaveRoom();
             };
 
-            pipControls.appendChild(pipMuteBtn);
-            pipControls.appendChild(pipCamBtn);
+            pipControls.appendChild(pipAudioBtn);
+            pipControls.appendChild(pipCameraBtn);
+            pipControls.appendChild(pipScreenBtn);
             pipControls.appendChild(pipLeaveBtn);
+
             pipWindow.document.body.appendChild(pipControls);
+
+// Set the correct initial state.
+            syncPipControlButtons();
+
+// Keep PiP controls synchronized with the main room.
+            const pipControlsTimer = setInterval(
+                syncPipControlButtons,
+                250
+            );
 // ────────────────────────────────────────────────────
 
             function cloneVideoElements() {
@@ -5230,6 +5472,8 @@ class RoomClient {
             });
 
             pipWindow.addEventListener('unload', () => {
+                clearInterval(pipControlsTimer);
+
                 if (videoRetryTimer) {
                     clearInterval(videoRetryTimer);
                     videoRetryTimer = null;
