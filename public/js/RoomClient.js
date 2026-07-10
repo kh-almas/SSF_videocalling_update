@@ -5181,13 +5181,40 @@ class RoomClient {
                 return foundVideo;
             }
 
-            if (!cloneVideoElements()) {
-                rc.documentPictureInPictureClose();
-                return userLog('warning', 'No video allowed for Document PIP', 'top-end', 6000);
+            let videoRetryTimer = null;
+
+            function syncPipVideos() {
+                if (pipWindow.closed) return false;
+
+                const videoFound = cloneVideoElements();
+
+                if (videoFound && videoRetryTimer) {
+                    clearInterval(videoRetryTimer);
+                    videoRetryTimer = null;
+                }
+
+                return videoFound;
+            }
+
+// When automatic PiP runs while the page is hidden,
+// videos may not be immediately available.
+// Do not close PiP; wait for them.
+            if (!syncPipVideos()) {
+                console.log('DOCUMENT PIP waiting for video streams');
+
+                videoRetryTimer = setInterval(() => {
+                    if (pipWindow.closed) {
+                        clearInterval(videoRetryTimer);
+                        videoRetryTimer = null;
+                        return;
+                    }
+
+                    syncPipVideos();
+                }, 300);
             }
 
             const videoObserver = new MutationObserver(() => {
-                cloneVideoElements();
+                syncPipVideos();
             });
 
             videoObserver.observe(rc.videoMediaContainer, {
@@ -5203,8 +5230,15 @@ class RoomClient {
             });
 
             pipWindow.addEventListener('unload', () => {
+                if (videoRetryTimer) {
+                    clearInterval(videoRetryTimer);
+                    videoRetryTimer = null;
+                }
+
                 videoObserver.disconnect();
                 documentObserver.disconnect();
+
+                console.log('DOCUMENT PIP window unloaded');
             });
         } catch (err) {
             userLog('warning', err.message, 'top-end', 6000);
