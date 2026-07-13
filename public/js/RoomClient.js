@@ -552,7 +552,7 @@ class RoomClient {
             room_id,
             peer_token: this.peer_info?.peer_token || '',
         });
-    }s
+    }
 
     async join(data) {
         this.socket
