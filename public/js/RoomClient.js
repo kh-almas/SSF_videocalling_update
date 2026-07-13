@@ -506,21 +506,40 @@ class RoomClient {
         // CREATE ROOM AND JOIN
         // ####################################################
 
+        // this.createRoom(this.room_id)
+        //     .then(async () => {
+        //         const data = {
+        //             room_id: this.room_id,
+        //             peer_info: this.peer_info,
+        //         };
+        //         console.log('data', data);
+        //         await this.join(data);
+        //         this.initSockets();
+        //         this._isConnected = true;
+        //         successCallback();
+        //     })
+        //     .catch((err) => {
+        //         console.log('err', err);
+        //         this.roomCreateDenied(err);
+        //     });
+
         this.createRoom(this.room_id)
-            .then(async () => {
+            .then(async (response) => {
+                console.log('[CREATE ROOM RESPONSE]', response);
+
                 const data = {
                     room_id: this.room_id,
                     peer_info: this.peer_info,
                 };
-                console.log('data', data);
+
                 await this.join(data);
                 this.initSockets();
                 this._isConnected = true;
                 successCallback();
             })
-            .catch((err) => {
-                console.log('err', err);
-                this.roomCreateDenied(err);
+            .catch((error) => {
+                console.error('[CREATE ROOM ERROR]', error);
+                this.roomCreateDenied(error);
             });
     }
 
