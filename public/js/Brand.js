@@ -45,8 +45,8 @@ const loginButton = document.getElementById('loginButton');
 let BRAND = {
     app: {
         language: 'en',
-        name: 'SSF Vidocalling',
-        title: 'SSF Vidocalling<br />browser based Real-time video calls.<br />Simple, Secure, Fast.',
+        name: 'SSF Video Calling',
+        title: 'SSF Video Calling<br />browser based Real-time video calls.<br />Simple, Secure, Fast.',
         description:
             'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
         joinDescription: 'Pick a room name.<br />How about this one?',
@@ -55,7 +55,7 @@ let BRAND = {
         joinLastLabel: 'Your recent room:',
     },
     site: {
-        title: 'SSF Vidocalling, Video Calls, Messaging and Screen Sharing',
+        title: 'SSF Video Calling, Video Calls, Messaging and Screen Sharing',
         icon: '../images/logo.svg',
         appleTouchIcon: '../images/logo.svg',
         newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
@@ -64,7 +64,7 @@ let BRAND = {
     },
     meta: {
         description:
-            'SSF Vidocalling powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser.',
+            'SSF Video Calling powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser.',
         keywords:
             'webrtc, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
     },
@@ -81,7 +81,7 @@ let BRAND = {
         footer: true,
     },
     whoAreYou: {
-        title: 'SSF Vidocalling - Waiting for host to start the meeting',
+        title: 'SSF Video Calling - Waiting for host to start the meeting',
         waitingRoomHeading: 'Waiting for host...',
         waitingRoomDescription:
             "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
@@ -128,7 +128,7 @@ let BRAND = {
             </a>
             <br /><br />
             <hr />
-            <span>&copy; 2026 SSF Vidocalling, all rights reserved</span>
+            <span>&copy; 2026 SSF Video Calling, all rights reserved</span>
             <hr />
         `,
     },
@@ -158,7 +158,7 @@ let BRAND = {
                 connectText: 'connect in < 5 seconds',
                 onlineText: 'We are online',
                 offlineText: 'We are offline',
-                poweredBy: 'Powered by SSF Vidocalling',
+                poweredBy: 'Powered by SSF Video Calling',
             },
             alert: {
                 enabled: false,
