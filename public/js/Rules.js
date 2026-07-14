@@ -50,7 +50,7 @@ let BUTTONS = {
         unlockRoomButton: true, // presenter
         broadcastingButton: true, // presenter
         lobbyButton: true, // presenter
-        sendEmailInvitation: true, // presenter
+        sendEmailInvitation: false, // presenter
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
         tabNotificationsBtn: true, // presenter
@@ -178,7 +178,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.tabRTMPStreamingBtn = true;
         BUTTONS.settings.lockRoomButton = BUTTONS.settings.lockRoomButton && !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = BUTTONS.settings.lockRoomButton && isRoomLocked;
-        BUTTONS.settings.sendEmailInvitation = true;
+        BUTTONS.settings.sendEmailInvitation = false;
 
         show(editorUnlockBtn);
         show(transcriptionAllLi);

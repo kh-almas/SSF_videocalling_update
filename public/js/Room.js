@@ -2510,7 +2510,7 @@ function handleButtons() {
         isMobileDevice ? shareRoom(true) : copyRoomURL();
     };
     roomSendEmail.onclick = () => {
-        shareRoomByEmail();
+        // shareRoomByEmail();
     };
     chatButton.onclick = () => {
         rc.toggleChat();
