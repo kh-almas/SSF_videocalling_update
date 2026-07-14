@@ -5571,65 +5571,192 @@ class RoomClient {
         return true;
     }
 
-    goInFullscreen(element) {
-        if (element.requestFullscreen) element.requestFullscreen();
-        else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
-        else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
-        else if (element.msRequestFullscreen) element.msRequestFullscreen();
-        else this.userLog('warning', 'Full screen mode not supported by this browser on this device', 'top-end');
+    async goInFullscreen(element) {
+        if (element.requestFullscreen) {
+            return element.requestFullscreen();
+        }
+
+        if (element.webkitRequestFullscreen) {
+            return element.webkitRequestFullscreen();
+        }
+
+        if (element.mozRequestFullScreen) {
+            return element.mozRequestFullScreen();
+        }
+
+        if (element.msRequestFullscreen) {
+            return element.msRequestFullscreen();
+        }
+
+        this.userLog(
+            'warning',
+            'Full screen mode not supported by this browser on this device',
+            'top-end'
+        );
     }
 
-    goOutFullscreen(element) {
-        if (element.exitFullscreen) element.exitFullscreen();
-        else if (element.mozCancelFullScreen) element.mozCancelFullScreen();
-        else if (element.webkitExitFullscreen) element.webkitExitFullscreen();
-        else if (element.msExitFullscreen) element.msExitFullscreen();
+    async goOutFullscreen() {
+        if (document.exitFullscreen) {
+            return document.exitFullscreen();
+        }
+
+        if (document.webkitExitFullscreen) {
+            return document.webkitExitFullscreen();
+        }
+
+        if (document.mozCancelFullScreen) {
+            return document.mozCancelFullScreen();
+        }
+
+        if (document.msExitFullscreen) {
+            return document.msExitFullscreen();
+        }
     }
 
     handleFS(elemId, fsId) {
         const videoPlayer = this.getId(elemId);
         const btnFs = this.getId(fsId);
+
         if (!videoPlayer || !btnFs) return;
+        if (btnFs.dataset.fullscreenHandlerAttached) return;
+
+        btnFs.dataset.fullscreenHandlerAttached = 'true';
 
         this.setTippy(fsId, 'Full screen', 'bottom');
 
         const videoWrap = this.getId(elemId + '__video');
-        const fsTarget = videoWrap || videoPlayer;
+        const videoBar = this.getId(elemId + '__vb');
+        const fullscreenTarget = videoWrap || videoPlayer;
 
-        const getFsElement = () =>
-            document.fullscreenElement ||
-            document.webkitFullscreenElement ||
-            document.mozFullScreenElement ||
-            document.msFullscreenElement ||
-            null;
+        const dropdownContent = btnFs.closest('.navbar-dropdown-content');
+        const dropdownItem = btnFs.closest('.navbar-dropdown-item');
+        const dropdownLabel = dropdownItem
+            ? dropdownItem.querySelector('span')
+            : null;
 
-        const sync = () => {
-            const fsEl = getFsElement();
-            const isThisVideoFullscreen = fsEl === fsTarget;
-            if (isThisVideoFullscreen) {
-                this.isVideoOnFullScreen = true;
-                videoPlayer.style.pointerEvents = 'none';
-                return;
-            }
+        const originalVideoBarParent = videoBar?.parentNode;
+        const originalVideoBarNextSibling = videoBar?.nextSibling;
 
-            if (!fsEl) {
-                videoPlayer.style.pointerEvents = 'auto';
-                this.isVideoOnFullScreen = false;
+        const originalDropdownParent = dropdownContent?.parentNode;
+        const originalDropdownNextSibling = dropdownContent?.nextSibling;
+
+        const getFullscreenElement = () => {
+            return (
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement ||
+                null
+            );
+        };
+
+        const restoreNode = (node, parent, nextSibling) => {
+            if (!node || !parent || node.parentNode === parent) return;
+
+            if (nextSibling && nextSibling.parentNode === parent) {
+                parent.insertBefore(node, nextSibling);
+            } else {
+                parent.appendChild(node);
             }
         };
 
-        if (!videoPlayer.dataset.fsSyncAttached) {
-            videoPlayer.dataset.fsSyncAttached = '1';
-            document.addEventListener('fullscreenchange', sync);
-            document.addEventListener('webkitfullscreenchange', sync);
-        }
-
-        btnFs.addEventListener('click', () => {
-            if (videoPlayer.classList.contains('videoCircle')) {
-                return this.userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+        const moveControlsIntoFullscreen = () => {
+            if (videoBar && !fullscreenTarget.contains(videoBar)) {
+                fullscreenTarget.appendChild(videoBar);
             }
-            this.toggleFullScreen(fsTarget);
-            setTimeout(sync, 0);
+
+            if (
+                dropdownContent &&
+                !fullscreenTarget.contains(dropdownContent)
+            ) {
+                fullscreenTarget.appendChild(dropdownContent);
+            }
+        };
+
+        const restoreControls = () => {
+            restoreNode(
+                videoBar,
+                originalVideoBarParent,
+                originalVideoBarNextSibling
+            );
+
+            restoreNode(
+                dropdownContent,
+                originalDropdownParent,
+                originalDropdownNextSibling
+            );
+        };
+
+        const syncFullscreenState = () => {
+            const fullscreenElement = getFullscreenElement();
+            const isCurrentVideoFullscreen =
+                fullscreenElement === fullscreenTarget;
+
+            if (isCurrentVideoFullscreen) {
+                this.isVideoOnFullScreen = true;
+                btnFs.className = html.fullScreenOn;
+
+                if (dropdownLabel) {
+                    dropdownLabel.textContent = 'Exit Full Screen';
+                }
+
+                return;
+            }
+
+            if (!fullscreenElement) {
+                this.isVideoOnFullScreen = false;
+                btnFs.className = html.fullScreen;
+
+                if (dropdownLabel) {
+                    dropdownLabel.textContent = 'Full Screen';
+                }
+
+                restoreControls();
+            }
+        };
+
+        document.addEventListener(
+            'fullscreenchange',
+            syncFullscreenState
+        );
+
+        document.addEventListener(
+            'webkitfullscreenchange',
+            syncFullscreenState
+        );
+
+        btnFs.addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            dropdownContent?.classList.remove('show');
+
+            if (videoPlayer.classList.contains('videoCircle')) {
+                return this.userLog(
+                    'info',
+                    'Full Screen not allowed if video is in privacy mode',
+                    'top-end'
+                );
+            }
+
+            const fullscreenElement = getFullscreenElement();
+
+            try {
+                if (fullscreenElement === fullscreenTarget) {
+                    await this.goOutFullscreen();
+                    return;
+                }
+
+                // Another element is already fullscreen.
+                if (fullscreenElement) return;
+
+                moveControlsIntoFullscreen();
+                await this.goInFullscreen(fullscreenTarget);
+                syncFullscreenState();
+            } catch (error) {
+                console.error('Unable to change fullscreen mode:', error);
+                restoreControls();
+            }
         });
     }
 
@@ -5805,23 +5932,34 @@ class RoomClient {
     createDropdownItem(btnEl, label, dropdownContent, color) {
         const item = document.createElement('div');
         item.className = 'navbar-dropdown-item';
-        item.appendChild(btnEl);
+
         const span = document.createElement('span');
         span.textContent = label;
+
+        item.appendChild(btnEl);
         item.appendChild(span);
+
         if (color) {
             btnEl.style.setProperty('color', color, 'important');
             span.style.setProperty('color', color, 'important');
         }
-        let dispatching = false;
-        item.addEventListener('click', (e) => {
-            if (dispatching) return;
-            e.stopPropagation();
-            dispatching = true;
-            btnEl.click();
-            dispatching = false;
-            if (dropdownContent) dropdownContent.classList.remove('show');
+
+        item.addEventListener('click', (event) => {
+            event.stopPropagation();
+
+            // Do not trigger the button again when the button itself was clicked.
+            const buttonWasClicked =
+                event.target === btnEl || btnEl.contains(event.target);
+
+            if (!buttonWasClicked) {
+                btnEl.click();
+            }
+
+            if (dropdownContent) {
+                dropdownContent.classList.remove('show');
+            }
         });
+
         return item;
     }
 

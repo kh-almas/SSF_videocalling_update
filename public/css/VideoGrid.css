@@ -597,3 +597,17 @@ input[type='range'] {
         font-size: 10px;
     }
 }
+
+/* Keep video toolbar and dropdown working in fullscreen */
+.Camera:fullscreen,
+.Camera:-webkit-full-screen {
+    overflow: visible !important;
+}
+
+.Camera:fullscreen .videoMenuBar,
+.Camera:fullscreen .navbar-dropdown-content,
+.Camera:-webkit-full-screen .videoMenuBar,
+.Camera:-webkit-full-screen .navbar-dropdown-content {
+    z-index: 2147483647 !important;
+    pointer-events: auto !important;
+}

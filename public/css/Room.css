@@ -6066,7 +6066,7 @@ z-index:
     .room-name-badge {
         top: auto;
         right: auto;
-        bottom: calc(55px + env(safe-area-inset-bottom, 0px));
+        bottom: calc(72px + env(safe-area-inset-bottom, 0px));
         left: 50%;
         transform: translateX(-50%);
 
