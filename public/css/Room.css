@@ -6025,12 +6025,14 @@ z-index:
     left: 18px;
     bottom: 18px;
     z-index: 999;
+
     display: none;
     align-items: center;
     gap: 8px;
 
     max-width: 260px;
     padding: 8px 14px;
+    box-sizing: border-box;
     border-radius: 10px;
 
     color: #ffffff;
@@ -6042,18 +6044,39 @@ z-index:
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 
     pointer-events: none;
 }
 
 .room-name-badge i {
+    flex-shrink: 0;
     font-size: 13px;
     opacity: 0.9;
 }
 
 .room-name-badge span {
+    min-width: 0;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+    .room-name-badge {
+        top: auto;
+        right: auto;
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        left: 50%;
+        transform: translateX(-50%);
+
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        padding: 7px 12px;
+        font-size: 13px;
+    }
+
+    .room-name-badge span {
+        max-width: calc(100vw - 70px);
+    }
 }
