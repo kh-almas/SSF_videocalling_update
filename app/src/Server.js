@@ -2230,20 +2230,20 @@ function startServer() {
             // Room does not exist. Only database admin can create it.
             if (hostCfg.protected || hostCfg.user_auth) {
                 if (!peer_token) {
-                    return callback({ error: 'Only admin can create rooms01' });
+                    return callback({ error: 'Only admin can create rooms' });
                 }
 
                 try {
                     const validToken = await isValidToken(peer_token);
 
                     if (!validToken) {
-                        return callback({ error: 'Only admin can create rooms02' });
+                        return callback({ error: 'Only admin can create rooms' });
                     }
 
                     const { username, password } = checkXSS(decodeToken(peer_token));
 
                     const isPeerAdmin = await axios.post(
-                        hostCfg.check_user_role,
+                        'https://talk-admin.ssf.gov.bd/api/v1/user/isAdmin',
                         {
                             username: username,
                             password: password,
@@ -2256,10 +2256,10 @@ function startServer() {
 
                     if (isPeerAdmin.data.message !== true) {
                         log.warn('[createRoom] - Non-admin tried to create room', { username, room_id });
-                        return callback({ error: 'Only admin can create rooms03' });
+                        return callback({ error: 'Only admin can create rooms' });
                     }
                 } catch (err) {
-                    return callback({ error: 'Only admin can create rooms04s' });
+                    return callback({ error: 'Only admin can create rooms' });
                 }
             }
 
