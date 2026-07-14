@@ -2230,14 +2230,14 @@ function startServer() {
             // Room does not exist. Only database admin can create it.
             if (hostCfg.protected || hostCfg.user_auth) {
                 if (!peer_token) {
-                    return callback({ error: 'Only admin can create rooms' });
+                    return callback({ error: 'Only admin can create rooms01' });
                 }
 
                 try {
                     const validToken = await isValidToken(peer_token);
 
                     if (!validToken) {
-                        return callback({ error: 'Only admin can create rooms' });
+                        return callback({ error: 'Only admin can create rooms02' });
                     }
 
                     const { username, password } = checkXSS(decodeToken(peer_token));
@@ -2256,10 +2256,10 @@ function startServer() {
 
                     if (isPeerAdmin.data.message !== true) {
                         log.warn('[createRoom] - Non-admin tried to create room', { username, room_id });
-                        return callback({ error: 'Only admin can create rooms' });
+                        return callback({ error: 'Only admin can create rooms03' });
                     }
                 } catch (err) {
-                    return callback({ error: 'Only admin can create rooms' });
+                    return callback({ error: 'Only admin can create rooms04s' });
                 }
             }
 
