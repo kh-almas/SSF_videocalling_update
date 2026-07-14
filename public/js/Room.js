@@ -34,96 +34,82 @@ const isFirefox = parserResult.browser.name?.toLowerCase() === 'firefox';
 const thisInfo = getInfo();
 
 const isEmbedded = window.self !== window.top;
-const showDocumentPipBtn = !isEmbedded && 'documentPictureInPicture' in window;
+
+const showDocumentPipBtn =
+    !isEmbedded && 'documentPictureInPicture' in window;
 
 let autoDocumentPipRegistered = false;
 let documentPipOpening = false;
 
+/**
+ * Opens the same Document PiP used by the button.
+ */
 async function openDocumentPipOnly() {
-    console.log('openDocumentPipOnly started');
-
     if (!showDocumentPipBtn) {
-        console.error('PiP stopped: Document PiP unsupported');
-        return;
+        console.warn('Document PiP is not supported');
+        return false;
     }
 
     if (!rc) {
-        console.error('PiP stopped: RoomClient is unavailable');
-        return;
+        console.warn('RoomClient is not ready');
+        return false;
     }
 
     if (documentPipOpening) {
-        console.warn('PiP stopped: opening already in progress');
-        return;
+        return false;
     }
 
-    const currentPipWindow = documentPictureInPicture.window;
+    const currentPipWindow =
+        window.documentPictureInPicture.window;
 
     if (currentPipWindow && !currentPipWindow.closed) {
-        console.warn('PiP stopped: window already exists');
-        return;
+        return true;
     }
 
     documentPipOpening = true;
 
     try {
-        console.log('Calling documentPictureInPictureOpen');
-
         await rc.documentPictureInPictureOpen();
 
-        console.log('PiP open result:', {
-            windowExists: Boolean(documentPictureInPicture.window),
-        });
+        return Boolean(
+            window.documentPictureInPicture.window &&
+            !window.documentPictureInPicture.window.closed
+        );
     } catch (error) {
-        console.error('Automatic Document PiP failed:', error);
+        console.error('Unable to open Document PiP:', error);
+        return false;
     } finally {
         documentPipOpening = false;
     }
 }
 
+/**
+ * Allows Chrome to open Document PiP automatically when
+ * the user minimizes Chrome or switches tabs/apps.
+ */
 function setupAutomaticDocumentPip() {
     if (autoDocumentPipRegistered) return;
     if (!showDocumentPipBtn) return;
     if (!('mediaSession' in navigator)) return;
 
     try {
-        navigator.mediaSession.setActionHandler('enterpictureinpicture', async (details) => {
-            console.log('Automatic Document PiP requested:', {
-                reason: details?.reason || 'legacy',
-                hidden: document.hidden,
-                visibilityState: document.visibilityState,
-                hasFocus: document.hasFocus(),
-            });
+        navigator.mediaSession.setActionHandler(
+            'enterpictureinpicture',
+            () => {
+                console.log('Chrome requested automatic PiP');
 
-            await openDocumentPipOnly();
-        });
+                void openDocumentPipOnly();
+            }
+        );
 
         autoDocumentPipRegistered = true;
+
         console.log('Automatic Document PiP registered');
     } catch (error) {
-        console.error('Automatic Document PiP registration failed:', error);
-    }
-}
-
-let persistentPipEnabled = false;
-
-async function enablePersistentDocumentPip() {
-    if (!showDocumentPipBtn || !rc) return false;
-
-    if (documentPictureInPicture.window) {
-        persistentPipEnabled = true;
-        return true;
-    }
-
-    try {
-        await rc.documentPictureInPictureOpen();
-        persistentPipEnabled = Boolean(documentPictureInPicture.window);
-
-        return persistentPipEnabled;
-    } catch (error) {
-        persistentPipEnabled = false;
-        console.error('Unable to enable persistent PiP:', error);
-        return false;
+        console.warn(
+            'Automatic Document PiP is not supported:',
+            error
+        );
     }
 }
 
@@ -1862,14 +1848,13 @@ function joinRoom(peer_name, room_id) {
             roomIsReady
         );
 
-        setupAutomaticDocumentPip();
         handleRoomClientEvents();
     }
 }
 
 function roomIsReady() {
+    setupAutomaticDocumentPip();
     startRoomSession();
-
     makeRoomPopupQR();
 
     if (peer_avatar && isValidAvatarURL(peer_avatar)) {
@@ -2865,12 +2850,14 @@ function handleButtons() {
     documentPiPButton.onclick = async () => {
         if (!showDocumentPipBtn || !rc) return;
 
-        if (documentPictureInPicture.window) {
-            documentPictureInPicture.window.close();
+        const pipWindow = window.documentPictureInPicture.window;
+
+        if (pipWindow && !pipWindow.closed) {
+            pipWindow.close();
             return;
         }
 
-        await rc.documentPictureInPictureOpen();
+        await openDocumentPipOnly();
     };
     snapshotRoomButton.onclick = () => {
         rc.snapshotRoom();
