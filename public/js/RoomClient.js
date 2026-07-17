@@ -3738,7 +3738,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
+        let elem, vb, d, p, i, au, pip, fs, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3798,7 +3798,6 @@ class RoomClient {
                 sf = this.createButton(id + '___' + remotePeerId + '___sendFile', html.sendFile);
                 sm = this.createButton(id + '___' + remotePeerId + '___sendMsg', html.sendMsg);
                 sv = this.createButton(id + '___' + remotePeerId + '___sendVideo', html.sendVideo);
-                cm = this.createButton(id + '___' + remotePeerId + '___video', html.videoOn);
                 au = this.createButton(remotePeerId + '__audio', remotePeerAudio ? html.audioOn : html.audioOff);
                 gl = this.createButton(id + '___' + remotePeerId + '___geoLocation', html.geolocation);
                 ban = this.createButton(id + '___' + remotePeerId + '___ban', html.ban);
@@ -3853,7 +3852,6 @@ class RoomClient {
                 vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
                 vb.appendChild(au);
-                vb.appendChild(cm);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
@@ -3891,7 +3889,6 @@ class RoomClient {
                 this.handleHA(ha.id, d.id);
                 this.handleSM(sm.id, peer_name);
                 this.handleSV(sv.id, peer_name);
-                BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
                 BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handleCV(id + '___' + pv.id);
                 this.handleGL(gl.id);
@@ -3922,7 +3919,6 @@ class RoomClient {
                     this.setTippy(pn.id, 'Pin', 'bottom');
                     this.setTippy(ha.id, 'Focus mode', 'bottom');
                     this.setTippy(pip.id, 'picture in picture', 'bottom');
-                    this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
                 }
@@ -11221,25 +11217,6 @@ class RoomClient {
         if (btnHa) {
             btnHa.addEventListener('click', (e) => {
                 this.toggleFocusMode(videoContainerId, btnHa);
-            });
-        }
-    }
-
-    handleCM(uid) {
-        const words = uid.split('___');
-        let peer_id = words[1] + '___pVideo';
-        let btnCm = this.getId(uid);
-        if (btnCm) {
-            btnCm.addEventListener('click', (e) => {
-                if (e.target.className === html.videoOn) {
-                    isPresenter
-                        ? this.peerAction('me', peer_id, 'hide')
-                        : this.userLog('warning', 'Only the presenter can hide the participants', 'top-end');
-                } else {
-                    isPresenter
-                        ? this.peerAction('me', peer_id, 'unhide')
-                        : this.userLog('warning', 'Only the presenter can unhide the participants', 'top-end');
-                }
             });
         }
     }
