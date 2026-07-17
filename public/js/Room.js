@@ -640,7 +640,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
         setTippy('chatButton', 'Toggle the chat', bPlacement);
         setTippy('participantsButton', 'Toggle participants list', bPlacement);
-        setTippy('settingsButton', 'Toggle the settings', bPlacement);
+        // setTippy('settingsButton', 'Toggle the settings', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
 }

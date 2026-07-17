@@ -315,17 +315,17 @@
                 <span id="participantsCountBadge"></span>
             </button>
             <div id="settingsSplit" class="split-btn">
-                <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
+                
                 <div id="settingsExtraDropdown" class="dropdown dropup hidden">
                     <button
                         id="settingsExtraToggle"
-                        class="dropdown-toggle device-dropdown-toggle"
+                        class="dropdown-toggle"
                         type="button"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                         aria-label="Settings menu"
                     >
-                        <i class="fas fa-chevron-up"></i>
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div
                         id="settingsExtraMenu"
@@ -404,10 +404,11 @@
                         <!-- VIEW & SETTINGS -->
                         <div
                             class="device-menu-header extra-menu-group"
-                            data-buttons="hideMeButton,fullScreenButton,restartICEButton,aboutButton"
+                            data-buttons="hideMeButton,fullScreenButton,restartICEButton,aboutButton,settingsButton"
                         >
                             VIEW & SETTINGS
                         </div>
+                        <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i>Settings</button>
                         <button id="hideMeButton" class="hidden">
                             <i id="hideMeIcon" class="fas fa-user"></i> Hide Me
                         </button>
