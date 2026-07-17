@@ -3738,7 +3738,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, au, pip, fs, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
+        let elem, vb, d, p, i, au, pip, fs, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3790,7 +3790,6 @@ class RoomClient {
                 eVc.id = remotePeerId + (type === mediaType.screen ? '_screen_' : '_video_') + '_videoExpandContent';
 
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
-                mv = this.createButton(id + '__videoMirror', html.mirror);
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
@@ -3829,7 +3828,6 @@ class RoomClient {
                 pv.value = 100;
 
                 // Build dropdown items
-                eVc.appendChild(this.createDropdownItem(mv, 'Mirror', eVc));
                 BUTTONS.consumerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
                     eVc.appendChild(this.createDropdownItem(fs, 'Full Screen', eVc));
@@ -3883,7 +3881,6 @@ class RoomClient {
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleVB(d.id, vb.id);
                 this.handleDD(elem.id, remotePeerId);
-                this.handleMV(elem.id, mv.id);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
                 this.handleSF(sf.id, peer_name);
                 this.handleHA(ha.id, d.id);
