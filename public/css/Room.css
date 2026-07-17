@@ -6080,3 +6080,7 @@ z-index:
         max-width: calc(100vw - 70px);
     }
 }
+
+.current-session-time{
+    display:none;
+}

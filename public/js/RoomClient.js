@@ -3252,11 +3252,11 @@ class RoomClient {
                 if (isScreen && this.videoMediaContainer.childElementCount > 1) pn.click();
 
                 if (!this.isMobileDevice) {
-                    this.setTippy(pn.id, 'Toggle Pin', 'bottom');
-                    this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
-                    this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
+                    this.setTippy(pn.id, 'Pin', 'bottom');
+                    this.setTippy(ha.id, 'Focus mode', 'bottom');
+                    this.setTippy(pip.id, 'picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
-                    this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
+                    this.setTippy(vp.id, 'video privacy', 'bottom');
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
 
@@ -3928,9 +3928,9 @@ class RoomClient {
                 }
 
                 if (!this.isMobileDevice) {
-                    this.setTippy(pn.id, 'Toggle Pin', 'bottom');
-                    this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
-                    this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
+                    this.setTippy(pn.id, 'Pin', 'bottom');
+                    this.setTippy(ha.id, 'Focus mode', 'bottom');
+                    this.setTippy(pip.id, 'picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
