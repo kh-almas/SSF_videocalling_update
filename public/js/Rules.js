@@ -36,7 +36,7 @@ let BUTTONS = {
         transcriptionButton: true,
         whiteboardButton: true,
         documentPiPButton: true,
-        snapshotRoomButton: true,
+        snapshotRoomButton: false,
         emojiRoomButton: true,
         settingsButton: true,
         aboutButton: true, // Please keep me always visible, thank you!

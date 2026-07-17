@@ -1890,7 +1890,7 @@ function roomIsReady() {
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
     if (BUTTONS.settings.tabRecording) {
-        show(startRecButton);
+        // show(startRecButton);
     } else {
         hide(startRecButton);
         hide(tabRecordingBtn);
@@ -1901,7 +1901,6 @@ function roomIsReady() {
     BUTTONS.main.editorButton && show(editorButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
-    show(fileShareExtraButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     show(chatShowParticipantsListBtn);
@@ -2732,10 +2731,10 @@ function handleButtons() {
         isRecording ? stopRecButton.click() : startRecButton.click();
     };
     startRecButton.onclick = () => {
-        rc.startRecording();
+        // rc.startRecording();
     };
     stopRecButton.onclick = () => {
-        rc.stopRecording();
+        // rc.stopRecording();
     };
     pauseRecButton.onclick = () => {
         rc.pauseRecording();
@@ -4219,7 +4218,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.startRec, () => {
         console.log('Room event: Client start recoding');
         hide(startRecButton);
-        show(stopRecButton);
+        // show(stopRecButton);
         show(pauseRecButton);
         show(recordingTime);
         startRecordingTimer();
@@ -4245,7 +4244,7 @@ function handleRoomClientEvents() {
         hide(pauseRecButton);
         hide(resumeRecButton);
         hide(recordingTime);
-        show(startRecButton);
+        // show(startRecButton);
         stopRecordingTimer();
         isRecording = false;
         rc.updatePeerInfo(peer_name, socket.id, 'recording', false);
@@ -4415,7 +4414,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.hostOnlyRecordingOff, () => {
         if (isRulesActive && !isPresenter) {
             console.log('Room event: host only recording disabled');
-            show(startRecButton);
+            // show(startRecButton);
             show(recordingImage);
             hide(roomHostOnlyRecording);
             hide(recordingMessage);
