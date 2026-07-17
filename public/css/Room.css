@@ -6028,9 +6028,9 @@ z-index:
 
     display: none;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 
-    max-width: 260px;
+    max-width: 320px;
     padding: 8px 14px;
     box-sizing: border-box;
     border-radius: 10px;
@@ -6054,8 +6054,21 @@ z-index:
     opacity: 0.9;
 }
 
-.room-name-badge span {
+.room-name-badge .bangladesh-time {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.room-name-badge .room-name-separator {
+    flex: 0 0 auto;
+    opacity: 0.75;
+}
+
+.room-name-badge .room-name-badge-text {
+    display: inline-block;
+    flex: 0 1 auto;
     min-width: 0;
+    max-width: 15ch;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -6076,8 +6089,8 @@ z-index:
         font-size: 13px;
     }
 
-    .room-name-badge span {
-        max-width: calc(100vw - 70px);
+    .room-name-badge .room-name-badge-text {
+        max-width: 10ch;
     }
 }
 

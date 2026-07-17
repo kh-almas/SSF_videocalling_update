@@ -309,7 +309,15 @@ const exitLeaveBtn = getId('exitLeaveBtn');
 const exitLeaveAllBtn = getId('exitLeaveAllBtn');
 
 const roomNameBadge = getId('roomNameBadge');
+const bangladeshTimeText = getId('bangladeshTimeText');
 const roomNameBadgeText = getId('roomNameBadgeText');
+
+const bangladeshTimeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Dhaka',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+});
 
 // ####################################################
 // VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
@@ -443,10 +451,20 @@ let quill = null;
 document.addEventListener('DOMContentLoaded', function () {
     initCursorLightEffect();
     initDocumentListener();
+
+    updateBangladeshTime();
+    setInterval(updateBangladeshTime, 1000);
+
     socket.once('connect', () => {
         initClient();
     });
 });
+
+function updateBangladeshTime() {
+    if (!bangladeshTimeText) return;
+
+    bangladeshTimeText.textContent = bangladeshTimeFormatter.format(new Date());
+}
 
 // ####################################################
 // MOUSE CURSOR LIGHT EFFECT
