@@ -31,7 +31,6 @@ const html = {
     fullScreen: 'fas fa-expand',
     fullScreenOn: 'fas fa-compress-alt',
     fullScreenOff: 'fas fa-expand-alt',
-    snapshot: 'fas fa-camera-retro',
     sendFile: 'fas fa-upload',
     sendMsg: 'fas fa-paper-plane',
     sendVideo: 'fab fa-youtube',
@@ -3086,7 +3085,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
+        let elem, vb, vp, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -3117,7 +3116,6 @@ class RoomClient {
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
-                ts = this.createButton(id + '__snapshot', html.snapshot);
                 mv = this.createButton(id + '__mirror', html.mirror);
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
@@ -3162,7 +3160,6 @@ class RoomClient {
                 BUTTONS.producerVideo.audioVolumeInput && vb.appendChild(pv);
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
-                BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
@@ -3188,7 +3185,6 @@ class RoomClient {
                 BUTTONS.producerVideo.audioVolumeInput && vb.appendChild(pv);
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
-                BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
@@ -3230,7 +3226,6 @@ class RoomClient {
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleVB(d.id, vb.id);
                 this.handleDD(elem.id, this.peer_id, true);
-                this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 this.handleHA(ha.id, d.id);
                 BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, d.id);
@@ -3255,7 +3250,6 @@ class RoomClient {
                     this.setTippy(pn.id, 'Pin', 'bottom');
                     this.setTippy(ha.id, 'Focus mode', 'bottom');
                     this.setTippy(pip.id, 'picture in picture', 'bottom');
-                    this.setTippy(ts.id, 'Snapshot', 'bottom');
                     this.setTippy(vp.id, 'video privacy', 'bottom');
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
@@ -3744,7 +3738,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
+        let elem, vb, d, p, i, cm, au, pip, fs, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3798,7 +3792,6 @@ class RoomClient {
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 mv = this.createButton(id + '__videoMirror', html.mirror);
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
-                ts = this.createButton(id + '__snapshot', html.snapshot);
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
@@ -3861,7 +3854,6 @@ class RoomClient {
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
                 vb.appendChild(au);
                 vb.appendChild(cm);
-                BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
@@ -3893,7 +3885,6 @@ class RoomClient {
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleVB(d.id, vb.id);
                 this.handleDD(elem.id, remotePeerId);
-                this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
                 this.handleSF(sf.id, peer_name);
@@ -3931,7 +3922,6 @@ class RoomClient {
                     this.setTippy(pn.id, 'Pin', 'bottom');
                     this.setTippy(ha.id, 'Focus mode', 'bottom');
                     this.setTippy(pip.id, 'picture in picture', 'bottom');
-                    this.setTippy(ts.id, 'Snapshot', 'bottom');
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
@@ -6125,34 +6115,6 @@ class RoomClient {
         // 1 (cover) 2 (contain)
         BtnVideoObjectFit.selectedIndex = index;
         BtnVideoObjectFit.onchange();
-    }
-
-    // ####################################################
-    // TAKE SNAPSHOT
-    // ####################################################
-
-    handleTS(elemId, tsId) {
-        let videoPlayer = this.getId(elemId);
-        let btnTs = this.getId(tsId);
-        if (btnTs && videoPlayer) {
-            btnTs.addEventListener('click', () => {
-                if (videoPlayer.classList.contains('videoCircle')) {
-                    return this.userLog('info', 'SnapShoot not allowed if video on privacy mode', 'top-end');
-                }
-                this.sound('snapshot');
-                let context, canvas, width, height, dataURL;
-                width = videoPlayer.videoWidth;
-                height = videoPlayer.videoHeight;
-                canvas = canvas || document.createElement('canvas');
-                canvas.width = width;
-                canvas.height = height;
-                context = canvas.getContext('2d');
-                context.drawImage(videoPlayer, 0, 0, width, height);
-                dataURL = canvas.toDataURL('image/png');
-                // console.log(dataURL);
-                saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
-            });
-        }
     }
 
     // ####################################################
