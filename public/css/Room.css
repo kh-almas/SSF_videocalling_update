@@ -6098,3 +6098,68 @@ z-index:
     display:none;
 }
 
+/* Google Meet-style leave button */
+#bottomButtons #exitButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 76px;
+    height: 50px;
+    margin: 0;
+    padding: 0;
+
+    color: #ffffff !important;
+    background: #dc362e !important;
+    border: none !important;
+    border-radius: 999px !important;
+    box-shadow: none;
+
+    transform: none !important;
+}
+
+#bottomButtons #exitButton:hover,
+#bottomButtons #exitButton:focus,
+#bottomButtons #exitButton:active {
+    color: #ffffff !important;
+    background: #c9302a !important;
+    border-radius: 999px !important;
+    transform: none !important;
+}
+
+#bottomButtons #exitButton i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #ffffff !important;
+    font-size: 18px;
+    line-height: 1;
+
+    transform: rotate(135deg) !important;
+    transition: none !important;
+}
+
+/* Mobile */
+@media screen and (max-width: 500px) {
+    #bottomButtons #exitButton {
+        width: 60px;
+        height: 38px;
+    }
+
+    #bottomButtons #exitButton i {
+        font-size: 14px;
+    }
+}
+
+/* Very small mobile */
+@media screen and (max-width: 360px) {
+    #bottomButtons #exitButton {
+        width: 45px;
+        height: 28px;
+    }
+
+    #bottomButtons #exitButton i {
+        font-size: 11px;
+    }
+}
