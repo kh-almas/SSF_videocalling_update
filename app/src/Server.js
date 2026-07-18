@@ -3154,11 +3154,31 @@ function startServer() {
                 case 'privacy':
                     peer.updatePeerInfo({ type: data.type, status: data.active });
                     break;
-                case 'ejectAll':
-                    const { peer_name, peer_uuid } = data;
-                    const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
-                    if (!isPresenter) return;
-                    break;
+                case 'ejectAll': 
+                    {
+                        const roomId = socket.room_id;
+
+                        const isPresenter = isPeerPresenter(
+                            roomId,
+                            socket.id,
+                            peer.peer_info?.peer_name,
+                            peer.peer_info?.peer_uuid
+                        );
+
+                        if (!isPresenter) return;
+
+                        // Remove all stored presenter permissions for this room
+                        delete presenters[roomId];
+
+                        // Remove all stored lobby approvals for this room
+                        lobbyApprovedPeers.delete(roomId);
+
+                        log.debug('[Room cleanup] - Room access data removed', {
+                            room_id: roomId,
+                        });
+
+                        break;
+                    }
                 case 'peerAudio':
                     // Keep producer volume to update consumer on join room...
                     if (data.audioProducerId) {
