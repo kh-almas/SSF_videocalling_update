@@ -470,6 +470,9 @@ const roomList = new Map(); // All Rooms
 // presenters[room_id][peer_uuid] = presenter info
 const presenters = {}; // Collect presenters grp by roomId
 
+// Stores lobby-approved peer UUIDs for each room
+const lobbyApprovedPeers = new Map();
+
 const streams = {}; // Collect all rtmp streams
 const STREAM_TIMEOUT_MS = 60 * 1000; // Cleanup orphaned streams after 60s of inactivity
 
@@ -2475,16 +2478,30 @@ function startServer() {
 
             const isBreakoutRoomCheck = socket.room_id.includes('_breakout_');
 
-            if (!isBreakoutRoomCheck && (room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
-                log.debug(
-                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter'
-                );
+            const isLobbyEnabled = room.isLobbyEnabled() || room.isGlobalLobbyEnabled();
+
+            const roomApprovedPeers = lobbyApprovedPeers.get(socket.room_id);
+
+            const hasLobbyApproval = Boolean(
+                peer_uuid &&
+                roomApprovedPeers &&
+                roomApprovedPeers.has(peer_uuid)
+            );
+
+            if (
+                !isBreakoutRoomCheck &&
+                isLobbyEnabled &&
+                !isPresenter &&
+                !hasLobbyApproval
+            ) {
                 peer.updatePeerInfo({ type: 'lobby', status: true });
+
                 room.broadCast(socket.id, 'roomLobby', {
                     peer_id: peer_id,
                     peer_name: peer_name,
                     lobby_status: 'waiting',
                 });
+
                 return cb('isLobby');
             }
 
@@ -3278,13 +3295,29 @@ function startServer() {
             }
 
             if (data.lobby_status === 'accept') {
-                for (const peer_id of pears_id) {
-                    const peer = room.getPeer(peer_id);
-                    if (!peer.peer_lobby) continue;
+                for (const approvedPeerId of pears_id) {
+                    const approvedPeer = room.getPeer(approvedPeerId);
 
-                    peer.updatePeerInfo({ type: 'lobby', status: false });
+                    if (!approvedPeer || !approvedPeer.peer_lobby) continue;
 
-                    handleJoinWebHook(room.id, peer.peer_info);
+                    const approvedPeerUuid = approvedPeer.peer_info?.peer_uuid;
+
+                    if (approvedPeerUuid) {
+                        if (!lobbyApprovedPeers.has(socket.room_id)) {
+                            lobbyApprovedPeers.set(socket.room_id, new Set());
+                        }
+
+                        lobbyApprovedPeers
+                            .get(socket.room_id)
+                            .add(approvedPeerUuid);
+                    }
+
+                    approvedPeer.updatePeerInfo({
+                        type: 'lobby',
+                        status: false,
+                    });
+
+                    handleJoinWebHook(room.id, approvedPeer.peer_info);
                 }
             }
         });
