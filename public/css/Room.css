@@ -6163,3 +6163,8 @@ z-index:
         font-size: 11px;
     }
 }
+
+/* Keep video PiP buttons in JavaScript but hide them from the interface */
+button[id$='__pictureInPicture'] {
+    display: none !important;
+}

@@ -3085,7 +3085,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
+        let d, vb, i, h, p, pm, pb, pv, st, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -3121,11 +3121,6 @@ class RoomClient {
                 pn = this.createButton(id + '__pin', html.pin);
                 st = this.createElement(id + '__sessionTime', 'span', 'current-session-time notranslate');
                 vp = this.createButton(this.peer_id + '__vp', html.videoPrivacy);
-                au = this.createButton(
-                    this.peer_id + '__audio',
-                    this.peer_info.peer_audio ? html.audioOn : html.audioOff
-                );
-                au.style.cursor = 'default';
 
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
@@ -3158,7 +3153,6 @@ class RoomClient {
                 pv.value = 100;
 
                 BUTTONS.producerVideo.audioVolumeInput && vb.appendChild(pv);
-                BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
@@ -3251,7 +3245,6 @@ class RoomClient {
                     this.setTippy(ha.id, 'Focus mode', 'bottom');
                     this.setTippy(pip.id, 'picture in picture', 'bottom');
                     this.setTippy(vp.id, 'video privacy', 'bottom');
-                    this.setTippy(au.id, 'Audio status', 'bottom');
                 }
 
                 handleAspectRatio();
@@ -3794,13 +3787,6 @@ class RoomClient {
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
-                sf = this.createButton(id + '___' + remotePeerId + '___sendFile', html.sendFile);
-                sm = this.createButton(id + '___' + remotePeerId + '___sendMsg', html.sendMsg);
-                sv = this.createButton(id + '___' + remotePeerId + '___sendVideo', html.sendVideo);
-                au = this.createButton(remotePeerId + '__audio', remotePeerAudio ? html.audioOn : html.audioOff);
-                gl = this.createButton(id + '___' + remotePeerId + '___geoLocation', html.geolocation);
-                ban = this.createButton(id + '___' + remotePeerId + '___ban', html.ban);
-                ko = this.createButton(id + '___' + remotePeerId + '___kickOut', html.kickOut);
 
                 i = document.createElement('i');
                 i.id = remotePeerId + '__hand';
@@ -3829,18 +3815,10 @@ class RoomClient {
 
                 // Build dropdown items
                 BUTTONS.consumerVideo.fullScreenButton &&
-                    this.isVideoFullScreenSupported &&
-                    eVc.appendChild(this.createDropdownItem(fs, 'Full Screen', eVc));
-                BUTTONS.consumerVideo.sendMessageButton &&
-                    eVc.appendChild(this.createDropdownItem(sm, 'Private Message', eVc));
-                BUTTONS.consumerVideo.geolocationButton &&
-                    eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
-                BUTTONS.consumerVideo.sendFileButton && eVc.appendChild(this.createDropdownItem(sf, 'Send File', eVc));
-                BUTTONS.consumerVideo.sendVideoButton &&
-                    eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
-                BUTTONS.consumerVideo.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
-                BUTTONS.consumerVideo.ejectButton &&
-                    eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+                this.isVideoFullScreenSupported &&
+                eVc.appendChild(
+                    this.createDropdownItem(fs, 'Full Screen', eVc)
+                );
 
                 eDiv.appendChild(eBtn);
                 document.body.appendChild(eVc);
@@ -3849,7 +3827,6 @@ class RoomClient {
 
                 vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
-                vb.appendChild(au);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
@@ -3882,15 +3859,8 @@ class RoomClient {
                 this.handleVB(d.id, vb.id);
                 this.handleDD(elem.id, remotePeerId);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
-                this.handleSF(sf.id, peer_name);
                 this.handleHA(ha.id, d.id);
-                this.handleSM(sm.id, peer_name);
-                this.handleSV(sv.id, peer_name);
-                BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handleCV(id + '___' + pv.id);
-                this.handleGL(gl.id);
-                this.handleBAN(ban.id);
-                this.handleKO(ko.id);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.handleZV(elem.id, d.id, remotePeerId);
                 this.popupPeerInfo(p.id, peer_info);
@@ -3916,7 +3886,6 @@ class RoomClient {
                     this.setTippy(pn.id, 'Pin', 'bottom');
                     this.setTippy(ha.id, 'Focus mode', 'bottom');
                     this.setTippy(pip.id, 'picture in picture', 'bottom');
-                    this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
                 }
 
@@ -4070,8 +4039,6 @@ class RoomClient {
         vb.id = peer_id + '__vb';
         vb.className = 'videoMenuBar hidden';
 
-        au = this.createButton(peer_id + '__audio', peer_audio ? html.audioOn : html.audioOff);
-
         pv = document.createElement('input');
         pv.id = peer_id + '___pVolume';
         pv.type = 'range';
@@ -4079,15 +4046,12 @@ class RoomClient {
         pv.max = 100;
         pv.value = 100;
 
-        if (false) {
-            sf = this.createButton('remotePeer___' + peer_id + '___sendFile', html.sendFile);
-            sm = this.createButton('remotePeer___' + peer_id + '___sendMsg', html.sendMsg);
-            sv = this.createButton('remotePeer___' + peer_id + '___sendVideo', html.sendVideo);
-            gl = this.createButton('remotePeer___' + peer_id + '___geoLocation', html.geolocation);
-            ban = this.createButton('remotePeer___' + peer_id + '___ban', html.ban);
-            ko = this.createButton('remotePeer___' + peer_id + '___kickOut', html.kickOut);
-        } else {
-            st = this.createElement(peer_id + '__sessionTime', 'span', 'current-session-time notranslate');
+        if (!remotePeer) {
+            st = this.createElement(
+                peer_id + '__sessionTime',
+                'span',
+                'current-session-time notranslate'
+            );
         }
 
         i = document.createElement('img');
@@ -4119,17 +4083,9 @@ class RoomClient {
         pb.style.height = '1%';
         pm.appendChild(pb);
 
-        if (remotePeer) {
-            BUTTONS.videoOff.ejectButton && vb.appendChild(ko);
-            BUTTONS.videoOff.banButton && vb.appendChild(ban);
-            BUTTONS.videoOff.geolocationButton && vb.appendChild(gl);
-            BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
-            BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
-            BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
-        }
+        
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
 
-        vb.appendChild(au);
         if (!remotePeer) vb.appendChild(st);
 
         d.appendChild(i);
@@ -4155,16 +4111,9 @@ class RoomClient {
         vb.addEventListener('click', (e) => e.stopPropagation());
 
         this.videoMediaContainer.appendChild(d);
-        BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
 
         if (remotePeer) {
             this.handleCV('remotePeer___' + pv.id);
-            this.handleSM(sm.id, peer_name);
-            this.handleSF(sf.id, peer_name);
-            this.handleSV(sv.id, peer_name);
-            this.handleGL(gl.id);
-            this.handleBAN(ban.id);
-            this.handleKO(ko.id);
         } else {
             this.handlePV(this.audioConsumers.get(pv.id) + '___' + pv.id);
         }
@@ -4179,14 +4128,7 @@ class RoomClient {
         if (isParticipantsListOpen) getRoomParticipants();
 
         if (!this.isMobileDevice && remotePeer) {
-            this.setTippy(sm.id, 'Send message', 'bottom');
-            this.setTippy(sf.id, 'Send file', 'bottom');
-            this.setTippy(sv.id, 'Send video', 'bottom');
-            this.setTippy(au.id, 'Mute', 'bottom');
             this.setTippy(pv.id, '🔊 Volume', 'bottom');
-            this.setTippy(gl.id, 'Geolocation', 'bottom');
-            this.setTippy(ban.id, 'Ban', 'bottom');
-            this.setTippy(ko.id, 'Eject', 'bottom');
         }
 
         remotePeer ? this.setPeerAudio(peer_id, peer_audio) : this.setIsAudio(peer_id, peer_audio);
