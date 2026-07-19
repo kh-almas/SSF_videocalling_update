@@ -3085,7 +3085,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-         let elem, vb, vp, d, p, i, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
+        let elem, vb, vp, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -3121,6 +3121,13 @@ class RoomClient {
                 pn = this.createButton(id + '__pin', html.pin);
                 st = this.createElement(id + '__sessionTime', 'span', 'current-session-time notranslate');
                 vp = this.createButton(this.peer_id + '__vp', html.videoPrivacy);
+
+                au = this.createButton(
+                    this.peer_id + '__audio',
+                    this.peer_info.peer_audio ? html.audioOn : html.audioOff
+                );
+
+                au.style.cursor = 'default';
 
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
@@ -3177,6 +3184,7 @@ class RoomClient {
 
                 vb.appendChild(myDropdownDiv);
                 BUTTONS.producerVideo.audioVolumeInput && vb.appendChild(pv);
+                vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
@@ -3730,7 +3738,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, pip, fs, pb, pm, pv, pn, ha, dw;
+        let elem, vb, d, p, i, au, pip, fs, pb, pm, pv, pn, ha, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3787,6 +3795,11 @@ class RoomClient {
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
 
+                au = this.createButton(
+                    remotePeerId + '__audio',
+                    remotePeerAudio ? html.audioOn : html.audioOff
+                );
+
                 i = document.createElement('i');
                 i.id = remotePeerId + '__hand';
                 i.className = html.userHand;
@@ -3826,6 +3839,7 @@ class RoomClient {
 
                 vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
+                vb.appendChild(au);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
@@ -4024,7 +4038,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, p, pm, pb, pv, st, ri;
+        let d, vb, i, h, au, p, pm, pb, pv, st, ri;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
@@ -4037,6 +4051,11 @@ class RoomClient {
         vb = document.createElement('div');
         vb.id = peer_id + '__vb';
         vb.className = 'videoMenuBar hidden';
+
+        au = this.createButton(
+            peer_id + '__audio',
+            peer_audio ? html.audioOn : html.audioOff
+        );
 
         pv = document.createElement('input');
         pv.id = peer_id + '___pVolume';
@@ -4084,6 +4103,7 @@ class RoomClient {
 
         
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
+        vb.appendChild(au);
 
         if (!remotePeer) vb.appendChild(st);
 

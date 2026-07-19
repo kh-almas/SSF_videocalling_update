@@ -6168,3 +6168,8 @@ z-index:
 button[id$='__pictureInPicture'] {
     display: none !important;
 }
+
+/* Keep audio-status elements available to JavaScript but hide their buttons */
+button[id$='__audio'] {
+    display: none !important;
+}
