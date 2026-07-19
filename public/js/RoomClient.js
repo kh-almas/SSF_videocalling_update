@@ -2190,12 +2190,24 @@ class RoomClient {
         console.log(`Media constraints ${type}:`, mediaConstraints);
 
         try {
-            if (init) {
+                        if (init) {
                 stream = initStream;
             } else {
-                stream = screen
-                    ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
-                    : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+                if (screen) {
+                    const screenStreamPromise =
+                        navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+
+                    if (typeof openDocumentPipOnly === 'function') {
+                        void openDocumentPipOnly();
+                    }
+
+                    stream = await screenStreamPromise;
+                } else {
+                    stream =
+                        await navigator.mediaDevices.getUserMedia(mediaConstraints);
+                }
+
+                // Handle Virtual Background and Blur using MediaPipe
 
                 // Handle Virtual Background and Blur using MediaPipe
                 if (video && isMediaStreamTrackAndTransformerSupported) {
@@ -4573,6 +4585,10 @@ class RoomClient {
             if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
             if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
         }
+
+        if (typeof syncDocumentPipMediaSession === 'function') {
+            syncDocumentPipMediaSession();
+        }
     }
 
     setIsVideo(status) {
@@ -4584,6 +4600,10 @@ class RoomClient {
                 this.sendVideoOff();
             }
         }
+
+        if (typeof syncDocumentPipMediaSession === 'function') {
+            syncDocumentPipMediaSession();
+        }
     }
 
     setIsScreen(status) {
@@ -4594,6 +4614,10 @@ class RoomClient {
                 this.setVideoOff(this.peer_info, false);
                 this.sendVideoOff();
             }
+        }
+
+        if (typeof syncDocumentPipMediaSession === 'function') {
+            syncDocumentPipMediaSession();
         }
     }
 

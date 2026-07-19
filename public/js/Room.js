@@ -41,6 +41,31 @@ const showDocumentPipBtn =
 let autoDocumentPipRegistered = false;
 let documentPipOpening = false;
 
+function syncDocumentPipMediaSession() {
+    if (!('mediaSession' in navigator) || !rc) return;
+
+    const mediaSession = navigator.mediaSession;
+    const peerInfo = rc.peer_info || {};
+
+    try {
+        mediaSession.playbackState = 'playing';
+
+        if (typeof mediaSession.setMicrophoneActive === 'function') {
+            mediaSession.setMicrophoneActive(Boolean(peerInfo.peer_audio));
+        }
+
+        if (typeof mediaSession.setCameraActive === 'function') {
+            mediaSession.setCameraActive(Boolean(peerInfo.peer_video));
+        }
+
+        if (typeof mediaSession.setScreenshareActive === 'function') {
+            mediaSession.setScreenshareActive(Boolean(peerInfo.peer_screen));
+        }
+    } catch (error) {
+        console.warn('Unable to update automatic PiP media state:', error);
+    }
+}
+
 /**
  * Opens the same Document PiP used by the button.
  */
@@ -103,6 +128,7 @@ function setupAutomaticDocumentPip() {
         );
 
         autoDocumentPipRegistered = true;
+        syncDocumentPipMediaSession();
 
         console.log('Automatic Document PiP registered');
     } catch (error) {
