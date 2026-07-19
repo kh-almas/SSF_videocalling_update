@@ -6169,9 +6169,8 @@ button[id$='__pictureInPicture'] {
     display: none !important;
 }
 
-/* Keep audio-status elements available to JavaScript but hide their buttons */
-button[id$='__audio']
-button[id$='__mirror']
- {
+/* Hide audio buttons and the complete Mirror dropdown item */
+button[id$='__audio'],
+.navbar-dropdown-item:has(button[id$='__mirror']) {
     display: none !important;
 }
