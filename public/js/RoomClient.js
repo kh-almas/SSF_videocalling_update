@@ -5498,11 +5498,13 @@ class RoomClient {
                 pipVideoContainer.style.display = 'grid';
                 pipVideoContainer.style.gridTemplateColumns =
                     `repeat(${columnCount}, minmax(0, 1fr))`;
-                pipVideoContainer.style.gridTemplateRows =
-                    `repeat(${rowCount}, minmax(0, 1fr))`;
-                pipVideoContainer.style.gap = videoCount > 1 ? '8px' : '0';
                 pipVideoContainer.style.alignItems = 'stretch';
                 pipVideoContainer.style.justifyItems = 'stretch';
+
+                pipVideoContainer.style.gridTemplateRows = 'none';
+                pipVideoContainer.style.gridAutoRows = 'auto';
+                pipVideoContainer.style.alignContent = 'start';
+                pipVideoContainer.style.gap = '0';
 
                 pipVideos.forEach((pipVideo) => {
                     pipVideo.style.width = '100%';
