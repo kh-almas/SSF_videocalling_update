@@ -3085,7 +3085,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let d, vb, i, h, p, pm, pb, pv, st, ri;
+         let elem, vb, vp, d, p, i, pip, ha, fs, pm, pb, pn, pv, mv, st, dw, ri;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -3731,7 +3731,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, au, pip, fs, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, dw;
+        let elem, vb, d, p, i, pip, fs, pb, pm, pv, pn, ha, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
