@@ -5506,14 +5506,27 @@ class RoomClient {
 
                 pipVideos.forEach((pipVideo) => {
                     pipVideo.style.width = '100%';
-                    pipVideo.style.height = '100%';
                     pipVideo.style.maxWidth = 'none';
-                    pipVideo.style.maxHeight = 'none';
                     pipVideo.style.minHeight = '0';
                     pipVideo.style.margin = '0';
                     pipVideo.style.setProperty(
                         'object-fit',
                         'contain',
+                        'important'
+                    );
+                    pipVideo.style.setProperty(
+                        'height',
+                        'auto',
+                        'important'
+                    );
+                    pipVideo.style.setProperty(
+                        'max-height',
+                        '100%',
+                        'important'
+                    );
+                    pipVideo.style.setProperty(
+                        'align-self',
+                        'center',
                         'important'
                     );
                     pipVideo.style.background = '#000';
