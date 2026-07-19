@@ -5380,6 +5380,49 @@ class RoomClient {
             function cloneVideoElements() {
                 let foundVideo = false;
 
+                const sourceSignature = [...document.querySelectorAll('video')]
+                    .map((video) => {
+                        if (
+                            !video.srcObject ||
+                            video.id === '__videoShare'
+                        ) {
+                            return null;
+                        }
+
+                        const liveTrack = video.srcObject
+                            .getVideoTracks()
+                            .find(
+                                (track) =>
+                                    track.readyState === 'live'
+                            );
+
+                        if (
+                            !liveTrack ||
+                            video.classList.contains('videoCircle')
+                        ) {
+                            return null;
+                        }
+
+                        const mirror =
+                            video.classList.contains('mirror')
+                                ? '1'
+                                : '0';
+
+                        return `${video.id}:${liveTrack.id}:${mirror}`;
+                    })
+                    .filter(Boolean)
+                    .join('|');
+
+                if (
+                    pipVideoContainer.dataset.sourceSignature ===
+                    sourceSignature
+                ) {
+                    return sourceSignature.length > 0;
+                }
+
+                pipVideoContainer.dataset.sourceSignature =
+                    sourceSignature;
+
                 pipVideoContainer.innerHTML = '';
 
                 [...document.querySelectorAll('video')].forEach((video) => {
