@@ -42,13 +42,35 @@ let autoDocumentPipRegistered = false;
 let documentPipOpening = false;
 
 function syncDocumentPipMediaSession() {
-    if (!('mediaSession' in navigator) || !rc) return;
+    if (!showDocumentPipBtn || !rc || !('mediaSession' in navigator)) return;
 
     const mediaSession = navigator.mediaSession;
     const peerInfo = rc.peer_info || {};
 
     try {
+        mediaSession.setActionHandler('enterpictureinpicture', (details = {}) => {
+            const reason =
+                details.reason ||
+                details.enterPictureInPictureReason ||
+                'useraction';
+
+            console.log('Automatic PiP request:', reason);
+            void openDocumentPipOnly();
+        });
+    } catch (error) {
+        console.warn('Unable to register automatic PiP:', error);
+    }
+
+    try {
         mediaSession.playbackState = 'playing';
+
+        if ('MediaMetadata' in window && !mediaSession.metadata) {
+            mediaSession.metadata = new MediaMetadata({
+                title: document.title || 'Video meeting',
+                artist: 'MiroTalk SFU',
+                album: 'Live meeting',
+            });
+        }
 
         if (typeof mediaSession.setMicrophoneActive === 'function') {
             mediaSession.setMicrophoneActive(Boolean(peerInfo.peer_audio));
@@ -113,30 +135,13 @@ async function openDocumentPipOnly() {
  * the user minimizes Chrome or switches tabs/apps.
  */
 function setupAutomaticDocumentPip() {
-    if (autoDocumentPipRegistered) return;
     if (!showDocumentPipBtn) return;
     if (!('mediaSession' in navigator)) return;
 
-    try {
-        navigator.mediaSession.setActionHandler(
-            'enterpictureinpicture',
-            () => {
-                console.log('Chrome requested automatic PiP');
+    autoDocumentPipRegistered = true;
+    syncDocumentPipMediaSession();
 
-                void openDocumentPipOnly();
-            }
-        );
-
-        autoDocumentPipRegistered = true;
-        syncDocumentPipMediaSession();
-
-        console.log('Automatic Document PiP registered');
-    } catch (error) {
-        console.warn(
-            'Automatic Document PiP is not supported:',
-            error
-        );
-    }
+    console.log('Automatic Document PiP registered');
 }
 
 /**

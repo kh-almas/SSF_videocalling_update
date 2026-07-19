@@ -2190,24 +2190,26 @@ class RoomClient {
         console.log(`Media constraints ${type}:`, mediaConstraints);
 
         try {
-                        if (init) {
+            if (init) {
                 stream = initStream;
             } else {
                 if (screen) {
-                    const screenStreamPromise =
-                        navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+                    stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
 
-                    if (typeof openDocumentPipOnly === 'function') {
-                        void openDocumentPipOnly();
+                    const screenTrack = stream.getVideoTracks()[0];
+
+                    if (screenTrack && screenTrack.readyState === 'live') {
+                        if (typeof syncDocumentPipMediaSession === 'function') {
+                            syncDocumentPipMediaSession();
+                        }
+
+                        if (typeof openDocumentPipOnly === 'function') {
+                            await openDocumentPipOnly();
+                        }
                     }
-
-                    stream = await screenStreamPromise;
                 } else {
-                    stream =
-                        await navigator.mediaDevices.getUserMedia(mediaConstraints);
+                    stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
                 }
-
-                // Handle Virtual Background and Blur using MediaPipe
 
                 // Handle Virtual Background and Blur using MediaPipe
                 if (video && isMediaStreamTrackAndTransformerSupported) {
@@ -5406,8 +5408,40 @@ class RoomClient {
                     });
 
                     // Start observing for new videos and class changes
-                    videoElementObserver.observe(video, { attributes: true, attributeFilter: ['class'] });
+                    videoElementObserver.observe(video, {
+                        attributes: true,
+                        attributeFilter: ['class'],
+                    });
                 });
+
+                const pipVideos = [...pipVideoContainer.querySelectorAll('.pipVideo')];
+                const videoCount = pipVideos.length;
+                const columnCount = videoCount <= 2 ? 1 : 2;
+                const rowCount = Math.max(1, Math.ceil(videoCount / columnCount));
+
+                pipVideoContainer.style.display = 'grid';
+                pipVideoContainer.style.gridTemplateColumns =
+                    `repeat(${columnCount}, minmax(0, 1fr))`;
+                pipVideoContainer.style.gridTemplateRows =
+                    `repeat(${rowCount}, minmax(0, 1fr))`;
+                pipVideoContainer.style.gap = videoCount > 1 ? '8px' : '0';
+                pipVideoContainer.style.alignItems = 'stretch';
+                pipVideoContainer.style.justifyItems = 'stretch';
+
+                pipVideos.forEach((pipVideo) => {
+                    pipVideo.style.width = '100%';
+                    pipVideo.style.height = '100%';
+                    pipVideo.style.maxWidth = 'none';
+                    pipVideo.style.maxHeight = 'none';
+                    pipVideo.style.minHeight = '0';
+                    pipVideo.style.margin = '0';
+                    pipVideo.style.objectFit = 'cover';
+                    pipVideo.style.gridColumn = 'auto';
+                });
+
+                if (videoCount > 2 && videoCount % 2 === 1) {
+                    pipVideos[videoCount - 1].style.gridColumn = '1 / -1';
+                }
 
                 return foundVideo;
             }
@@ -5450,6 +5484,7 @@ class RoomClient {
 
             videoObserver.observe(rc.videoMediaContainer, {
                 childList: true,
+                subtree: true,
             });
 
             const documentObserver = new MutationObserver(() => {
