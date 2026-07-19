@@ -2169,7 +2169,6 @@ class RoomClient {
             case mediaType.screen:
                 if (!BUTTONS.main.startScreenButton) return;
                 mediaConstraints = this.getScreenConstraints();
-                this.peer_info.peer_screen = true;
                 screen = true;
                 break;
             default:
@@ -2194,21 +2193,38 @@ class RoomClient {
                 stream = initStream;
             } else {
                 if (screen) {
-                    stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
+                    window.documentPipScreenPickerOpen = true;
 
-                    const screenTrack = stream.getVideoTracks()[0];
+                    try {
+                        stream =
+                            await navigator.mediaDevices.getDisplayMedia(
+                                mediaConstraints
+                            );
 
-                    if (screenTrack && screenTrack.readyState === 'live') {
-                        if (typeof syncDocumentPipMediaSession === 'function') {
-                            syncDocumentPipMediaSession();
+                        const screenTrack = stream.getVideoTracks()[0];
+
+                        if (
+                            screenTrack &&
+                            screenTrack.readyState === 'live'
+                        ) {
+                            this.peer_info.peer_screen = true;
+
+                            if (
+                                typeof openDocumentPipOnly === 'function'
+                            ) {
+                                await openDocumentPipOnly();
+                            }
                         }
-
-                        if (typeof openDocumentPipOnly === 'function') {
-                            await openDocumentPipOnly();
-                        }
+                    } finally {
+                        window.setTimeout(() => {
+                            window.documentPipScreenPickerOpen = false;
+                        }, 500);
                     }
                 } else {
-                    stream = await navigator.mediaDevices.getUserMedia(mediaConstraints);
+                    stream =
+                        await navigator.mediaDevices.getUserMedia(
+                            mediaConstraints
+                        );
                 }
 
                 // Handle Virtual Background and Blur using MediaPipe
@@ -5359,6 +5375,7 @@ class RoomClient {
                 250
             );
 // ────────────────────────────────────────────────────
+            const observedPipVideoTracks = new WeakSet();
 
             function cloneVideoElements() {
                 let foundVideo = false;
@@ -5370,6 +5387,22 @@ class RoomClient {
 
                     // No video stream detected or is video share from URL...
                     if (!video.srcObject || video.id === '__videoShare') return;
+
+                    const liveVideoTrack = video.srcObject
+                        .getVideoTracks()
+                        .find((track) => track.readyState === 'live');
+
+                    if (!liveVideoTrack) return;
+
+                    if (!observedPipVideoTracks.has(liveVideoTrack)) {
+                        observedPipVideoTracks.add(liveVideoTrack);
+
+                        liveVideoTrack.addEventListener(
+                            'ended',
+                            () => window.setTimeout(syncPipVideos, 0),
+                            { once: true }
+                        );
+                    }
 
                     const videoElement = rc.getId(video.id);
 
@@ -5483,6 +5516,11 @@ class RoomClient {
             });
 
             videoObserver.observe(rc.videoMediaContainer, {
+                childList: true,
+                subtree: true,
+            });
+
+            videoObserver.observe(rc.videoPinMediaContainer, {
                 childList: true,
                 subtree: true,
             });

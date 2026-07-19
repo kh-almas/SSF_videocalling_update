@@ -40,6 +40,7 @@ const showDocumentPipBtn =
 
 let autoDocumentPipRegistered = false;
 let documentPipOpening = false;
+window.documentPipScreenPickerOpen = false;
 
 function syncDocumentPipMediaSession() {
     if (!showDocumentPipBtn || !rc || !('mediaSession' in navigator)) return;
@@ -50,11 +51,17 @@ function syncDocumentPipMediaSession() {
     try {
         mediaSession.setActionHandler('enterpictureinpicture', (details = {}) => {
             const reason =
-                details.reason ||
                 details.enterPictureInPictureReason ||
-                'useraction';
+                details.reason ||
+                'other';
 
             console.log('Automatic PiP request:', reason);
+
+            if (window.documentPipScreenPickerOpen) {
+                console.log('Automatic PiP ignored while screen picker is open');
+                return;
+            }
+
             void openDocumentPipOnly();
         });
     } catch (error) {
@@ -138,7 +145,34 @@ function setupAutomaticDocumentPip() {
     if (!showDocumentPipBtn) return;
     if (!('mediaSession' in navigator)) return;
 
-    autoDocumentPipRegistered = true;
+    if (!autoDocumentPipRegistered) {
+        const rearmAutomaticDocumentPip = () => {
+            if (window.documentPipScreenPickerOpen) return;
+
+            syncDocumentPipMediaSession();
+        };
+
+        window.addEventListener(
+            'blur',
+            rearmAutomaticDocumentPip,
+            true
+        );
+
+        window.addEventListener(
+            'focus',
+            rearmAutomaticDocumentPip,
+            true
+        );
+
+        document.addEventListener(
+            'visibilitychange',
+            rearmAutomaticDocumentPip,
+            true
+        );
+
+        autoDocumentPipRegistered = true;
+    }
+
     syncDocumentPipMediaSession();
 
     console.log('Automatic Document PiP registered');
