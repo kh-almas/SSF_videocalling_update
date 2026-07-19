@@ -5511,7 +5511,12 @@ class RoomClient {
                     pipVideo.style.maxHeight = 'none';
                     pipVideo.style.minHeight = '0';
                     pipVideo.style.margin = '0';
-                    pipVideo.style.objectFit = 'cover';
+                    pipVideo.style.setProperty(
+                        'object-fit',
+                        'contain',
+                        'important'
+                    );
+                    pipVideo.style.background = '#000';
                     pipVideo.style.gridColumn = 'auto';
                 });
 
