@@ -4079,7 +4079,7 @@ class RoomClient {
         pv.max = 100;
         pv.value = 100;
 
-        if (remotePeer) {
+        if (false) {
             sf = this.createButton('remotePeer___' + peer_id + '___sendFile', html.sendFile);
             sm = this.createButton('remotePeer___' + peer_id + '___sendMsg', html.sendMsg);
             sv = this.createButton('remotePeer___' + peer_id + '___sendVideo', html.sendVideo);
