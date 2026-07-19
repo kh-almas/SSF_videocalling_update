@@ -6174,3 +6174,7 @@ button[id$='__audio'],
 .navbar-dropdown-item:has(button[id$='__mirror']) {
     display: none !important;
 }
+
+.fa-solid, .fas {
+    color: white;
+}
