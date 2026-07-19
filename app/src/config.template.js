@@ -529,6 +529,7 @@ module.exports = {
                 process.env.USERS_ROOMS_ALLOWED_ENDPOINT || 'http://localhost:9000/api/v1/user/roomsAllowed', // 'https://webrtc.mirotalk.com/api/v1/user/roomsAllowed'
             api_room_exists: process.env.ROOM_EXISTS_ENDPOINT || 'http://localhost:9000/api/v1/room/exists', // 'https://webrtc.mirotalk.com//api/v1/room/exists'
 
+            check_user_role: process.env.CHECK_USER_ROLE || '',
             users: process.env.HOST_USERS
                 ? process.env.HOST_USERS.split('|').map((userStr) => {
                       const [username, password, displayname, allowedRoomsStr] = userStr.split(':');
