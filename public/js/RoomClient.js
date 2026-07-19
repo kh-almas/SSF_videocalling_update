@@ -3177,7 +3177,6 @@ class RoomClient {
 
                 vb.appendChild(myDropdownDiv);
                 BUTTONS.producerVideo.audioVolumeInput && vb.appendChild(pv);
-                BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
@@ -4025,7 +4024,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv, st, ri;
+        let d, vb, i, h, p, pm, pb, pv, st, ri;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
