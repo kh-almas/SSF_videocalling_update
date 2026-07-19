@@ -6170,6 +6170,8 @@ button[id$='__pictureInPicture'] {
 }
 
 /* Keep audio-status elements available to JavaScript but hide their buttons */
-button[id$='__audio'] {
+button[id$='__audio']
+button[id$='__mirror']
+ {
     display: none !important;
 }
