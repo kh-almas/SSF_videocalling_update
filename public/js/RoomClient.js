@@ -3197,15 +3197,12 @@ class RoomClient {
 
                 // Local dropdown menu
                 const myDropdownDiv = document.createElement('div');
-                const myDropdownBtn = this.createButton(id + '__dropdownBtn', html.expand);
+                const myDropdownBtn = this.createButton(id + '__dropdownBtn', html.expand + ' hidden');
                 const myDropdownContent = document.createElement('div');
                 myDropdownDiv.className = 'navbar-dropdown';
                 myDropdownContent.className = 'navbar-dropdown-content';
 
                 myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
-                BUTTONS.producerVideo.fullScreenButton &&
-                    this.isVideoFullScreenSupported &&
-                    myDropdownContent.appendChild(this.createDropdownItem(fs, 'Full Screen', myDropdownContent));
 
                 myDropdownDiv.appendChild(myDropdownBtn);
                 document.body.appendChild(myDropdownContent);
@@ -3219,9 +3216,20 @@ class RoomClient {
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
-                BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
-                BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
-                if (!this.isMobileDevice) vb.appendChild(pn);
+                BUTTONS.producerVideo.drawingButton &&
+                    isScreen &&
+                    vb.appendChild(dw);
+
+                if (!this.isMobileDevice) {
+                    vb.appendChild(pn);
+                }
+
+                BUTTONS.producerVideo.fullScreenButton &&
+                    this.isVideoFullScreenSupported &&
+                    vb.appendChild(fs);
+
+                BUTTONS.producerVideo.focusVideoButton &&
+                    vb.appendChild(ha);
 
                 vb.appendChild(st);
 
@@ -3770,8 +3778,6 @@ class RoomClient {
     async handleConsumer(id, type, stream, peer_name, peer_info) {
         let elem, vb, d, p, i, au, pip, fs, pb, pm, pv, pn, ha, dw;
 
-        let eDiv, eBtn, eVc; // expand buttons
-
         console.log('PEER-INFO', peer_info);
 
         const remotePeerId = peer_info.peer_id;
@@ -3806,18 +3812,6 @@ class RoomClient {
                 vb = document.createElement('div');
                 vb.id = id + '__vb';
                 vb.className = 'videoMenuBar hidden';
-
-                eDiv = document.createElement('div');
-                eDiv.className = 'navbar-dropdown';
-
-                eBtn = this.createButton(
-                    remotePeerId + (type === mediaType.screen ? '_screen_' : '_video_') + '_expandBtn',
-                    html.expand
-                );
-
-                eVc = document.createElement('div');
-                eVc.className = 'navbar-dropdown-content';
-                eVc.id = remotePeerId + (type === mediaType.screen ? '_screen_' : '_video_') + '_videoExpandContent';
 
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
@@ -3855,28 +3849,26 @@ class RoomClient {
                 pv.max = 100;
                 pv.value = 100;
 
-                // Build dropdown items
-                BUTTONS.consumerVideo.fullScreenButton &&
-                this.isVideoFullScreenSupported &&
-                eVc.appendChild(
-                    this.createDropdownItem(fs, 'Full Screen', eVc)
-                );
-
-                eDiv.appendChild(eBtn);
-                document.body.appendChild(eVc);
-                eBtn._dropdownContent = eVc;
-                this.handleDropdownEvents(eDiv, eBtn, eVc);
-
-                vb.appendChild(eDiv);
+                
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
                 vb.appendChild(au);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
-                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
-                BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
+                BUTTONS.consumerVideo.drawingButton &&
+                    remoteIsScreen &&
+                    vb.appendChild(dw);
 
-                if (!this.isMobileDevice) vb.appendChild(pn);
+                if (!this.isMobileDevice) {
+                    vb.appendChild(pn);
+                }
+
+                BUTTONS.consumerVideo.fullScreenButton &&
+                    this.isVideoFullScreenSupported &&
+                    vb.appendChild(fs);
+
+                BUTTONS.consumerVideo.focusVideoButton &&
+                    vb.appendChild(ha);
 
                 d.appendChild(elem);
                 d.appendChild(remoteVideoLoader);
