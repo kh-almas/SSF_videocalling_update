@@ -53,7 +53,7 @@ let BUTTONS = {
         sendEmailInvitation: false, // presenter
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
-        tabNotificationsBtn: true, // presenter
+        tabNotificationsBtn: false, // presenter
         tabModerator: false, // presenter
         tabRecording: true,
         host_only_recording: true, // presenter
