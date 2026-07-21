@@ -609,7 +609,7 @@ async function initClient() {
         setTippy('switchChatPin', 'Auto pin chat when opened', 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
-        setTippy('recordingImage', 'Toggle recording', 'right');
+        setTippy('recordingImage', 'Recording', 'right');
         setTippy(
             'switchHostOnlyRecording',
             'Only the host (presenter) has the capability to record the meeting',
@@ -617,8 +617,8 @@ async function initClient() {
         );
         setTippy('refreshVideoFiles', 'Refresh', 'left');
         setTippy('switchServerRecording', 'The recording will be stored on the server rather than locally', 'right');
-        setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
-        setTippy('whiteboardGridBtn', 'Toggle whiteboard grid', 'bottom');
+        setTippy('whiteboardGhostButton', 'Transparent background', 'bottom');
+        setTippy('whiteboardGridBtn', 'whiteboard grid', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
@@ -627,8 +627,8 @@ async function initClient() {
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
-        setTippy('whiteboardLockBtn', 'Toggle Lock whiteboard', 'right');
-        setTippy('whiteboardUnlockBtn', 'Toggle Lock whiteboard', 'right');
+        setTippy('whiteboardLockBtn', 'Lock whiteboard', 'right');
+        setTippy('whiteboardUnlockBtn', 'Lock whiteboard', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'bottom');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
@@ -637,25 +637,25 @@ async function initClient() {
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
-        setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'bottom');
+        setTippy('chatShowParticipantsListBtn', 'Participants list', 'bottom');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('fileShareChatButton', 'Share the file', 'top');
         setTippy('chatCloseButton', 'Close', 'bottom');
-        setTippy('chatTogglePin', 'Toggle pin', 'bottom');
+        setTippy('chatTogglePin', 'Pin', 'bottom');
         setTippy('chatHideParticipantsList', 'Hide', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
-        setTippy('pollTogglePin', 'Toggle pin', 'bottom');
-        setTippy('breakoutTogglePin', 'Toggle pin', 'bottom');
+        setTippy('pollTogglePin', 'Pin', 'bottom');
+        setTippy('breakoutTogglePin', 'Pin', 'bottom');
         setTippy('pollMaxButton', 'Maximize', 'bottom');
         setTippy('pollMinButton', 'Minimize', 'bottom');
         setTippy('pollSaveButton', 'Save results', 'bottom');
         setTippy('pollCloseBtn', 'Close', 'bottom');
-        setTippy('editorLockBtn', 'Toggle Lock editor', 'bottom');
-        setTippy('editorUnlockBtn', 'Toggle Lock editor', 'bottom');
+        setTippy('editorLockBtn', 'Lock editor', 'bottom');
+        setTippy('editorUnlockBtn', 'Lock editor', 'bottom');
         setTippy('editorCollabBtn', 'Switch to Private Note (your notes will NOT be shared)', 'bottom');
         setTippy('editorPrivateBtn', 'Switch back to Collaborative editor', 'bottom');
-        setTippy('editorTogglePin', 'Toggle pin', 'bottom');
+        setTippy('editorTogglePin', 'Pin', 'bottom');
         setTippy('editorUndoBtn', 'Undo', 'bottom');
         setTippy('editorRedoBtn', 'Redo', 'bottom');
         setTippy('editorCopyBtn', 'Copy', 'bottom');
@@ -665,10 +665,10 @@ async function initClient() {
         setTippy('pollAddOptionBtn', 'Add option', 'top');
         setTippy('pollDelOptionBtn', 'Delete option', 'top');
         setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
-        setTippy('participantsRaiseHandBtn', 'Toggle raise hands', 'bottom');
-        setTippy('participantsUnreadMessagesBtn', 'Toggle unread messages', 'bottom');
+        setTippy('participantsRaiseHandBtn', 'Raise hands', 'bottom');
+        setTippy('participantsUnreadMessagesBtn', 'Unread messages', 'bottom');
         setTippy('transcriptionCloseBtn', 'Close', 'bottom');
-        setTippy('transcriptionTogglePinBtn', 'Toggle pin', 'bottom');
+        setTippy('transcriptionTogglePinBtn', 'Pin', 'bottom');
         setTippy('transcriptionMaxBtn', 'Maximize', 'bottom');
         setTippy('transcriptionMinBtn', 'Minimize', 'bottom');
         setTippy('transcriptionSpeechStatus', 'Status', 'bottom');
@@ -702,8 +702,8 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopScreenButton', 'Stop screen share', bPlacement);
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
-        setTippy('chatButton', 'Toggle the chat', bPlacement);
-        setTippy('participantsButton', 'Toggle participants list', bPlacement);
+        setTippy('chatButton', 'Chat', bPlacement);
+        setTippy('participantsButton', 'Participants list', bPlacement);
         // setTippy('settingsButton', 'Toggle the settings', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
@@ -2028,7 +2028,7 @@ function roomIsReady() {
             BUTTONS.main.snapshotRoomButton && show(snapshotRoomButton);
         }
         BUTTONS.chat.chatPinButton && !isMobileDevice && show(chatTogglePin);
-        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+        // BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         BUTTONS.poll.pollPinButton && show(pollTogglePin);
         show(editorTogglePin);
         show(breakoutTogglePin);
@@ -2755,7 +2755,7 @@ function handleButtons() {
         rc.toggleChatPin();
     };
     chatMaxButton.onclick = () => {
-        rc.chatMaximize();
+        // rc.chatMaximize();
     };
     chatMinButton.onclick = () => {
         rc.chatMinimize();

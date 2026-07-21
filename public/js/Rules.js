@@ -102,7 +102,7 @@ let BUTTONS = {
     },
     chat: {
         chatPinButton: true,
-        chatMaxButton: true,
+        chatMaxButton: false,
         chatSaveButton: true,
         chatEmojiButton: true,
         chatMarkdownButton: true,

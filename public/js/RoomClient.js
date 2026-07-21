@@ -6457,9 +6457,9 @@ class RoomClient {
             await getRoomParticipants();
             hide(chatMinButton);
 
-            if (!this.isMobileDevice) {
-                BUTTONS.chat.chatMaxButton && show(chatMaxButton);
-            }
+            // if (!this.isMobileDevice) {
+            //     BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+            // }
             this.chatCenter();
             this.sound('open');
             this.showPeerAboutAndMessages(this.chatPeerId, this.chatPeerName, this.chatPeerAvatar);
@@ -6588,7 +6588,7 @@ class RoomClient {
     chatMinimize() {
         this.isChatMaximized = false;
         hide(chatMinButton);
-        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+        // BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         if (this.isChatPinned) {
             this.chatPin();
         } else {
@@ -6628,7 +6628,7 @@ class RoomClient {
         document.documentElement.style.setProperty('--msger-width', '800px');
         document.documentElement.style.setProperty('--msger-height', '700px');
         hide(chatMinButton);
-        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+        // BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         this.chatCenter();
         this.isChatPinned = false;
         setColor(chatTogglePin, 'white');

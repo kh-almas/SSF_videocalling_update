@@ -6178,3 +6178,9 @@ button[id$='__audio'],
 .fa-solid, .fas {
     color: white;
 }
+
+#ChatGPT,
+#DeepSeek
+ {
+    display: none !important;
+}
