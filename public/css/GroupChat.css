@@ -543,7 +543,7 @@
 }
 
 /* Send button */
-.chat-send-btn {
+/* .chat-send-btn {
     flex-shrink: 0;
     width: 36px;
     height: 36px;
@@ -564,7 +564,7 @@
         opacity 0.2s ease;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--dd-color) 35%, transparent);
     animation: sendBtnIn 0.2s ease-out;
-}
+} */
 
 @keyframes sendBtnIn {
     from {
@@ -577,6 +577,7 @@
     }
 }
 
+.chat-send-btn,
 .chat-send-btn:hover {
     color: #fff;
     filter: brightness(1.12);
@@ -584,6 +585,7 @@
     box-shadow: 0 3px 10px color-mix(in srgb, var(--dd-color) 40%, transparent);
 }
 
+.chat-send-btn,
 .chat-send-btn:active {
     filter: brightness(0.92);
     transform: scale(0.95);

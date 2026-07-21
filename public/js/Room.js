@@ -632,7 +632,6 @@ async function initClient() {
         setTippy('whiteboardCloseBtn', 'Close', 'bottom');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
-        setTippy('chatSendButton', 'Send', 'top');
         setTippy('showChatOnMsg', 'Show chat on new message comes', 'bottom');
         setTippy('speechIncomingMsg', 'Speech the incoming messages', 'bottom');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
@@ -1985,7 +1984,7 @@ function roomIsReady() {
         : (BUTTONS.main.transcriptionButton = false);
 
     show(chatCleanTextButton);
-    show(chatPasteButton);
+    // show(chatPasteButton);
     show(chatSendButton);
     if (isDesktopDevice) {
         show(whiteboardGridBtn);
