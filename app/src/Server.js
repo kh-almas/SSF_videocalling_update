@@ -3479,8 +3479,36 @@ function startServer() {
             if (!room) return;
 
             // Send breakout room assignment to each assigned peer
-            const { assignments, mainRoom } = data;
+            const { assignments } = data;
+            const mainRoom = socket.room_id;
             if (assignments && Array.isArray(assignments)) {
+
+                const breakoutRoomIds = [
+                    ...new Set(
+                        assignments.map(
+                            (assignment) => assignment.breakoutRoom
+                        )
+                    ),
+                ];
+
+                for (const breakoutRoomId of breakoutRoomIds) {
+                    if (
+                        !breakoutRoomId ||
+                        !breakoutRoomId.startsWith(`${mainRoom}_breakout_`) ||
+                        !Validator.isValidRoomName(breakoutRoomId) ||
+                        roomList.has(breakoutRoomId)
+                    ) {
+                        continue;
+                    }
+
+                    const worker = await getMediasoupWorker();
+
+                    roomList.set(
+                        breakoutRoomId,
+                        new Room(breakoutRoomId, worker, io)
+                    );
+                }
+
                 for (const assignment of assignments) {
                     const { peerId, breakoutRoom, duration, roomName } = assignment;
                     room.sendTo(peerId, 'breakoutRoom', {
