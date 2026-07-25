@@ -339,6 +339,20 @@ const pickr = Pickr.create({
 // ####################################################
 
 const participantsCountBadge = getId('participantsCountBadge');
+const recordingToggleButton = getId('recordingToggleButton');
+const recordingImageElement = getId('recordingImage');
+const roomRecordingSignal = getId('roomRecordingSignal');
+const roomRecordingSignalText = getId('roomRecordingSignalText');
+
+const activeRoomRecorders = new Map();
+
+const RECORDING_ACTIONS = {
+    started: 'Started conference recording',
+    start: 'Start conference recording',
+    stop: 'Stop conference recording',
+    pause: 'Pause recording',
+    resume: 'Resume recording',
+};
 const videoSelect = getId('videoSelect');
 const videoQuality = getId('videoQuality');
 const videoFps = getId('videoFps');
@@ -704,6 +718,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
         setTippy('chatButton', 'Chat', bPlacement);
         setTippy('participantsButton', 'Participants list', bPlacement);
+        setTippy('recordingToggleButton','Start or stop recording',bPlacement);
         // setTippy('settingsButton', 'Toggle the settings', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
@@ -1953,12 +1968,22 @@ function roomIsReady() {
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
+    
     if (BUTTONS.settings.tabRecording) {
-        // show(startRecButton);
+        const canRecord =
+            !isRulesActive ||
+            isPresenter ||
+            !hostOnlyRecording;
+
+        canRecord
+            ? show(recordingToggleButton)
+            : hide(recordingToggleButton);
     } else {
         hide(startRecButton);
         hide(tabRecordingBtn);
+        hide(recordingToggleButton);
     }
+
     BUTTONS.main.chatButton && show(chatButton);
     BUTTONS.main.participantsButton && show(participantsButton);
     BUTTONS.main.pollButton && show(pollButton);
@@ -2441,6 +2466,191 @@ function stopRecordingTimer() {
     recordingStatus.innerText = '0s';
 }
 
+/**
+ * Synchronize the toolbar recording button and original recording image.
+ */
+function syncLocalRecordingControls(active, paused = false) {
+    recordingToggleButton.classList.toggle('recording-active', active);
+    recordingToggleButton.classList.toggle('recording-paused', active && paused);
+
+    recordingImageElement.classList.toggle('recording-active', active);
+    recordingImageElement.classList.toggle('recording-paused', active && paused);
+
+    recordingToggleButton.setAttribute('aria-pressed', String(active));
+
+    const label = active ? 'Stop recording' : 'Start recording';
+
+    recordingToggleButton.setAttribute('aria-label', label);
+    recordingToggleButton.setAttribute('title', label);
+    recordingImageElement.setAttribute('title', label);
+
+    const icon = recordingToggleButton.querySelector('i');
+
+    if (icon) {
+        icon.className = active
+            ? 'fas fa-stop-circle'
+            : 'fas fa-record-vinyl';
+    }
+}
+
+/**
+ * Find every camera/screen card belonging to a peer.
+ * It also works when the participant's camera is off.
+ */
+function getRecorderVideoCards(peerId) {
+    const peerNameElementId = `${peerId}__name`;
+
+    return Array.from(
+        document.querySelectorAll(
+            `[id="${CSS.escape(peerNameElementId)}"]`
+        )
+    )
+        .map((nameElement) =>
+            nameElement.closest('.Camera')
+        )
+        .filter(
+            (card, index, cards) =>
+                card && cards.indexOf(card) === index
+        );
+}
+
+/**
+ * Show recording information in the recorder's
+ * video top-right area.
+ */
+function renderRoomRecordingSignal() {
+    // Remove previously rendered recording badges
+    document
+        .querySelectorAll('.video-recording-signal')
+        .forEach((element) => element.remove());
+
+    activeRoomRecorders.forEach((recorder) => {
+        const recorderCards = getRecorderVideoCards(
+            recorder.peerId
+        );
+
+        recorderCards.forEach((card) => {
+            const signal = document.createElement('div');
+            const dot = document.createElement('span');
+            const text = document.createElement('span');
+
+            signal.className = 'video-recording-signal';
+
+            if (recorder.paused) {
+                signal.classList.add('recording-paused');
+            }
+
+            dot.className = 'video-recording-signal-dot';
+            text.className = 'video-recording-signal-text';
+
+            text.textContent = recorder.paused
+                ? `${recorder.peerName} paused recording`
+                : `${recorder.peerName} is recording`;
+
+            signal.appendChild(dot);
+            signal.appendChild(text);
+
+            const videoMenuBar = card.querySelector('.videoMenuBar');
+
+            const volumeInput = videoMenuBar?.querySelector(
+                'input[id$="___pVolume"]'
+            );
+
+            if (videoMenuBar) {
+                if (volumeInput) {
+                    // Put recording signal directly after volume control
+                    volumeInput.insertAdjacentElement(
+                        'afterend',
+                        signal
+                    );
+                } else {
+                    // No volume control: put recording signal first
+                    videoMenuBar.prepend(signal);
+                }
+            } else {
+                card.appendChild(signal);
+            }
+        });
+    });
+}
+
+/**
+ * Called for both the local recorder and remote recordingAction events.
+ */
+function updateRoomRecordingSignal({ peerId, peerName, action }) {
+    const recorderKey = peerId || peerName;
+
+    if (!recorderKey) return;
+
+    switch (action) {
+        case RECORDING_ACTIONS.started:
+        case RECORDING_ACTIONS.start:
+            activeRoomRecorders.set(recorderKey, {
+                peerId: recorderKey,
+                peerName: peerName || 'A participant',
+                paused: false,
+            });
+            break;
+
+        case RECORDING_ACTIONS.pause: {
+            const recorder = activeRoomRecorders.get(recorderKey);
+
+            if (recorder) {
+                recorder.paused = true;
+                activeRoomRecorders.set(recorderKey, recorder);
+            }
+            break;
+        }
+
+        case RECORDING_ACTIONS.resume: {
+            const recorder = activeRoomRecorders.get(recorderKey);
+
+            if (recorder) {
+                recorder.paused = false;
+                activeRoomRecorders.set(recorderKey, recorder);
+            }
+            break;
+        }
+
+        case RECORDING_ACTIONS.stop:
+            activeRoomRecorders.delete(recorderKey);
+            break;
+
+        default:
+            return;
+    }
+
+    renderRoomRecordingSignal();
+}
+
+/*
+ * RoomClient.js can call this for remote socket events.
+ */
+window.updateRoomRecordingSignal = updateRoomRecordingSignal;
+
+/*
+ * Re-add the badge when a video card is recreated,
+ * for example after camera on/off or screen sharing.
+ */
+const recordingSignalObserver = new MutationObserver(
+    () => {
+        if (activeRoomRecorders.size === 0) return;
+
+        requestAnimationFrame(
+            renderRoomRecordingSignal
+        );
+    }
+);
+
+if (videoMediaContainer) {
+    recordingSignalObserver.observe(
+        videoMediaContainer,
+        {
+            childList: true,
+        }
+    );
+}
+
 // ####################################################
 // HTML BUTTONS
 // ####################################################
@@ -2791,14 +3001,46 @@ function handleButtons() {
     fullScreenButton.onclick = () => {
         rc.toggleRoomFullScreen();
     };
-    recordingImage.onclick = () => {
-        isRecording ? stopRecButton.click() : startRecButton.click();
-    };
+    function toggleRoomRecording() {
+        if (
+            isRulesActive &&
+            !isPresenter &&
+            hostOnlyRecording
+        ) {
+            userLog(
+                'warning',
+                'Only the presenter can record this meeting',
+                'top-end',
+                5000
+            );
+
+            return;
+        }
+
+        /*
+        * hasActiveRecorder() is important because rc.isRecording()
+        * becomes false while recording is paused.
+        */
+        const recordingExists =
+            rc.isRecording() || rc.hasActiveRecorder();
+
+        recordingExists
+            ? stopRecButton.click()
+            : startRecButton.click();
+    }
+
+    /*
+    * Both controls now execute exactly the same function.
+    */
+    recordingImage.onclick = toggleRoomRecording;
+    recordingToggleButton.onclick = toggleRoomRecording;
+
     startRecButton.onclick = () => {
-        // rc.startRecording();
+        rc.startRecording();
     };
+
     stopRecButton.onclick = () => {
-        // rc.stopRecording();
+        rc.stopRecording();
     };
     pauseRecButton.onclick = () => {
         rc.pauseRecording();
@@ -4279,41 +4521,127 @@ function loadSettingsFromLocalStorage() {
 // ####################################################
 
 function handleRoomClientEvents() {
+
+
+
+
+
     rc.on(RoomClient.EVENTS.startRec, () => {
-        console.log('Room event: Client start recoding');
+        console.log('Room event: Client start recording');
+
         hide(startRecButton);
-        // show(stopRecButton);
         show(pauseRecButton);
         show(recordingTime);
+
         startRecordingTimer();
+
         isRecording = true;
-        rc.updatePeerInfo(peer_name, socket.id, 'recording', true);
+
+        rc.updatePeerInfo(
+            peer_name,
+            socket.id,
+            'recording',
+            true
+        );
+
         rc.showRecordingIndicator();
+
+        syncLocalRecordingControls(true, false);
+
+        updateRoomRecordingSignal({
+            peerId: socket.id,
+            peerName: peer_name,
+            action: RECORDING_ACTIONS.start,
+        });
+
+        userLog(
+            'info',
+            '<i class="fas fa-record-vinyl"></i> Recording started. Everyone in the room has been notified.',
+            'top-end',
+            5000
+        );
     });
+
     rc.on(RoomClient.EVENTS.pauseRec, () => {
-        console.log('Room event: Client pause recoding');
+        console.log('Room event: Client pause recording');
+
         hide(pauseRecButton);
         show(resumeRecButton);
+
         rc.pauseRecordingIndicator();
+
+        syncLocalRecordingControls(true, true);
+
+        updateRoomRecordingSignal({
+            peerId: socket.id,
+            peerName: peer_name,
+            action: RECORDING_ACTIONS.pause,
+        });
     });
+
     rc.on(RoomClient.EVENTS.resumeRec, () => {
-        console.log('Room event: Client resume recoding');
+        console.log('Room event: Client resume recording');
+
         hide(resumeRecButton);
         show(pauseRecButton);
+
         rc.resumeRecordingIndicator();
+
+        syncLocalRecordingControls(true, false);
+
+        updateRoomRecordingSignal({
+            peerId: socket.id,
+            peerName: peer_name,
+            action: RECORDING_ACTIONS.resume,
+        });
     });
+
     rc.on(RoomClient.EVENTS.stopRec, () => {
-        console.log('Room event: Client stop recoding');
+        console.log('Room event: Client stop recording');
+
         hide(stopRecButton);
         hide(pauseRecButton);
         hide(resumeRecButton);
         hide(recordingTime);
-        // show(startRecButton);
+
         stopRecordingTimer();
+
         isRecording = false;
-        rc.updatePeerInfo(peer_name, socket.id, 'recording', false);
+
+        rc.updatePeerInfo(
+            peer_name,
+            socket.id,
+            'recording',
+            false
+        );
+
         rc.hideRecordingIndicator();
+
+        syncLocalRecordingControls(false, false);
+
+        updateRoomRecordingSignal({
+            peerId: socket.id,
+            peerName: peer_name,
+            action: RECORDING_ACTIONS.stop,
+        });
     });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     rc.on(RoomClient.EVENTS.raiseHand, () => {
         console.log('Room event: Client raise hand');
         hide(raiseHandButton);
@@ -4468,6 +4796,7 @@ function handleRoomClientEvents() {
             }
             hide(startRecButton);
             hide(recordingImage);
+            hide(recordingToggleButton);
             hide(roomHostOnlyRecording);
             hide(roomRecordingOptions);
             hide(roomRecordingServer);
@@ -4480,6 +4809,7 @@ function handleRoomClientEvents() {
             console.log('Room event: host only recording disabled');
             // show(startRecButton);
             show(recordingImage);
+            show(recordingToggleButton);
             hide(roomHostOnlyRecording);
             hide(recordingMessage);
             hostOnlyRecording = false;

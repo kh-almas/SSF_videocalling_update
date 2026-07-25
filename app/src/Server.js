@@ -3963,7 +3963,10 @@ function startServer() {
             }
 
             // Override client-supplied identity with server-side values to prevent spoofing
-            data.peer_name = peer.peer_info?.peer_name;
+            data.peer_name = peer.peer_info?.peer_name || 'A participant';
+
+            data.peer_avatar = peer.peer_info?.peer_avatar || '';
+
             data.peer_id = socket.id;
 
             log.debug('Recording action', data);

@@ -1348,6 +1348,15 @@ class RoomClient {
 
     handleRemoveMe = (data) => {
         console.log('SocketOn Remove me:', data);
+        if (
+            typeof window.updateRoomRecordingSignal === 'function'
+        ) {
+            window.updateRoomRecordingSignal({
+                peerId: data.peer_id,
+                peerName: data.peer_name,
+                action: enums.recording.stop,
+            });
+        }
         this.removeVideoOff(data.peer_id);
         this.lobbyRemoveMe(data.peer_id);
         participantsCount = data.peer_counts;
@@ -9272,6 +9281,16 @@ class RoomClient {
         console.log('Handle recording action', data);
 
         const { peer_name, peer_avatar, peer_id, action } = data;
+
+        if (
+            typeof window.updateRoomRecordingSignal === 'function'
+        ) {
+            window.updateRoomRecordingSignal({
+                peerId: peer_id,
+                peerName: peer_name,
+                action: action,
+            });
+        }
 
         const recAction = {
             side: 'left',
