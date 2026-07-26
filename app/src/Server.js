@@ -292,7 +292,134 @@ const hostCfg = {
     api_room_exists: config?.security?.host?.api_room_exists,
     check_user_role: config?.security?.host?.check_user_role || '',
     presenters: config?.security?.host?.presenters,
+    room_log_api:
+    config?.security?.host?.room_log_api ||
+        'http://talk-admin.ssf.gov.bd/api/v1/room-log',
+
+    users_api_timeout:
+        config?.security?.host?.users_api_timeout || 5000,
 };
+
+async function sendRoomLogToAdmin(createdBy, roomName) {
+    const cleanCreatedBy = String(createdBy || '').trim();
+    const cleanRoomName = String(roomName || '').trim();
+
+    log.info('[ROOM LOG 1] Function called', {
+        room_name: cleanRoomName,
+        created_by: cleanCreatedBy,
+    });
+
+    if (!cleanRoomName || !cleanCreatedBy) {
+        log.error('[ROOM LOG] Mandatory data missing', {
+            room_name: cleanRoomName,
+            created_by: cleanCreatedBy,
+        });
+
+        return {
+            saved: false,
+            status: null,
+            message: 'room_name and created_by are required',
+        };
+    }
+
+    const now = new Date();
+
+    const dateParts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Dhaka',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }).formatToParts(now);
+
+    const timeParts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Dhaka',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23',
+    }).formatToParts(now);
+
+    const getPart = (parts, type) => {
+        return parts.find((part) => part.type === type)?.value || '';
+    };
+
+    const date =
+        `${getPart(dateParts, 'year')}-` +
+        `${getPart(dateParts, 'month')}-` +
+        `${getPart(dateParts, 'day')}`;
+
+    const time =
+        `${getPart(timeParts, 'hour')}:` +
+        `${getPart(timeParts, 'minute')}:` +
+        `${getPart(timeParts, 'second')}`;
+
+    const payload = {
+        room_name: cleanRoomName,
+        created_by: cleanCreatedBy,
+        date,
+        time,
+        api_secret_key: hostCfg.users_api_secret_key,
+    };
+
+    log.info('[ROOM LOG 2] Payload prepared', {
+        room_name: payload.room_name,
+        created_by: payload.created_by,
+        date: payload.date,
+        time: payload.time,
+        api_secret_key: payload.api_secret_key
+            ? '[REDACTED]'
+            : '[MISSING]',
+    });
+
+    log.info('[ROOM LOG 3] Calling admin API from server.js', {
+        endpoint: hostCfg.room_log_api,
+        timeout: hostCfg.users_api_timeout,
+    });
+
+    try {
+        const response = await axios.post(
+            hostCfg.room_log_api,
+            payload,
+            {
+                timeout: hostCfg.users_api_timeout,
+            }
+        );
+
+        log.info('[ROOM LOG 4] API call successful', {
+            room_name: cleanRoomName,
+            created_by: cleanCreatedBy,
+            status: response.status,
+            response: response.data,
+        });
+
+        return {
+            saved: true,
+            status: response.status,
+            message:
+                response.data?.message ||
+                'Room log saved successfully',
+        };
+    } catch (error) {
+        log.error('[ROOM LOG 4] API call failed', {
+            room_name: cleanRoomName,
+            created_by: cleanCreatedBy,
+            endpoint: hostCfg.room_log_api,
+            message: error.message,
+            code: error.code || null,
+            status: error.response?.status || null,
+            response: error.response?.data || null,
+        });
+
+        return {
+            saved: false,
+            status: error.response?.status || null,
+            message:
+                error.response?.data?.message ||
+                error.message ||
+                'Room log API call failed',
+        };
+    }
+}
 
 const widget = {
     enabled: config?.ui?.brand?.widget?.enabled,
@@ -2217,70 +2344,299 @@ function startServer() {
             }
         });
 
-        socket.on('createRoom', async ({ room_id, peer_token }, callback) => {
-            if (!Validator.isValidRoomName(room_id)) {
-                log.warn('[createRoom] - Invalid room name', { room_id });
-                return callback({ error: 'invalid room name' });
-            }
+        // socket.on('createRoom', async ({ room_id, peer_token }, callback) => {
+        //     if (!Validator.isValidRoomName(room_id)) {
+        //         log.warn('[createRoom] - Invalid room name', { room_id });
+        //         return callback({ error: 'invalid room name' });
+        //     }
 
-            socket.room_id = room_id;
+        //     socket.room_id = room_id;
 
-            // Room already exists, so user is only joining. Do not require admin here.
-            if (roomList.has(socket.room_id)) {
-                return callback({ room_id: socket.room_id, already_exists: true });
-            }
+        //     // Room already exists, so user is only joining. Do not require admin here.
+        //     if (roomList.has(socket.room_id)) {
+        //         return callback({ room_id: socket.room_id, already_exists: true });
+        //     }
 
-            // Room does not exist. Only database admin can create it.
-            if (hostCfg.protected || hostCfg.user_auth) {
-                if (!peer_token) {
-                    return callback({ error: 'Only admin can create rooms' });
+        //     // Room does not exist. Only database admin can create it.
+        //     if (hostCfg.protected || hostCfg.user_auth) {
+        //         if (!peer_token) {
+        //             return callback({ error: 'Only admin can create rooms' });
+        //         }
+
+        //         try {
+        //             const validToken = await isValidToken(peer_token);
+
+        //             if (!validToken) {
+        //                 return callback({ error: 'Only admin can create rooms' });
+        //             }
+
+        //             const { username, password } = checkXSS(decodeToken(peer_token));
+
+        //             const isPeerAdmin = await axios.post(
+        //                 'https://talk-admin.ssf.gov.bd/api/v1/user/isAdmin',
+        //                 {
+        //                     username: username,
+        //                     password: password,
+        //                     api_secret_key: hostCfg.users_api_secret_key,
+        //                 },
+        //                 {
+        //                     timeout: hostCfg.users_api_timeout || 5000,
+        //                 }
+        //             );
+
+        //             if (isPeerAdmin.data.message !== true) {
+        //                 log.warn('[createRoom] - Non-admin tried to create room', { username, room_id });
+        //                 return callback({ error: 'Only admin can create rooms' });
+        //             }
+        //         } catch (err) {
+        //             return callback({ error: 'Only admin can create rooms' });
+        //         }
+        //     }
+
+        //     const ip = getIpSocket(socket);
+        //     if (!checkCreateRoomLimit(ip)) {
+        //         log.warn('[createRoom] - Rate limit exceeded', { ip, room_id });
+        //         return callback({
+        //             error: `Too many room creation requests. Please try again after ${minutesLabel(createRoomLimiterMinutes)}.`,
+        //         });
+        //     }
+
+        //     log.debug('Created room', { room_id: socket.room_id });
+
+        //     const worker = await getMediasoupWorker();
+        //     roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
+
+        //     return callback({ room_id: socket.room_id });
+        // });
+
+        socket.on(
+            'createRoom',
+            async ({ room_id, peer_token }, callback) => {
+                if (!Validator.isValidRoomName(room_id)) {
+                    log.warn('[createRoom] Invalid room name', {
+                        room_id,
+                    });
+
+                    return callback({
+                        error: 'invalid room name',
+                    });
                 }
 
-                try {
-                    const validToken = await isValidToken(peer_token);
+                socket.room_id = room_id;
 
-                    if (!validToken) {
-                        return callback({ error: 'Only admin can create rooms' });
-                    }
+                /*
+                * The room already exists.
+                * The user is joining, so do not create another room log.
+                */
+                if (roomList.has(socket.room_id)) {
+                    log.info('[createRoom] Room already exists', {
+                        room_id: socket.room_id,
+                    });
 
-                    const { username, password } = checkXSS(decodeToken(peer_token));
-
-                    const isPeerAdmin = await axios.post(
-                        'https://talk-admin.ssf.gov.bd/api/v1/user/isAdmin',
-                        {
-                            username: username,
-                            password: password,
-                            api_secret_key: hostCfg.users_api_secret_key,
+                    return callback({
+                        room_id: socket.room_id,
+                        already_exists: true,
+                        room_log: {
+                            attempted: false,
+                            saved: false,
+                            message: 'Existing room: no new log created',
                         },
-                        {
-                            timeout: hostCfg.users_api_timeout || 5000,
+                    });
+                }
+
+                let creatorUsername = '';
+                let creatorPassword = '';
+
+                /*
+                * Read the creator from the server-validated peer token.
+                */
+                if (peer_token) {
+                    try {
+                        const validToken = await isValidToken(peer_token);
+
+                        if (!validToken) {
+                            log.warn('[createRoom] Invalid creator token', {
+                                room_id,
+                            });
+
+                            return callback({
+                                error: 'Only admin can create rooms',
+                            });
                         }
+
+                        const tokenData = checkXSS(
+                            decodeToken(peer_token)
+                        );
+
+                        creatorUsername = String(
+                            tokenData?.username || ''
+                        ).trim();
+
+                        creatorPassword = String(
+                            tokenData?.password || ''
+                        );
+
+                        log.info('[createRoom] Creator identified', {
+                            room_id,
+                            created_by: creatorUsername,
+                        });
+                    } catch (error) {
+                        log.error('[createRoom] Token processing failed', {
+                            room_id,
+                            message: error.message,
+                        });
+
+                        return callback({
+                            error: 'Only admin can create rooms',
+                        });
+                    }
+                }
+
+                /*
+                * created_by is mandatory.
+                */
+                if (!creatorUsername) {
+                    log.error('[createRoom] Creator username is missing', {
+                        room_id,
+                    });
+
+                    return callback({
+                        error: 'Unable to identify room creator',
+                    });
+                }
+
+                /*
+                * Only a database admin can create a new room.
+                */
+                if (hostCfg.protected || hostCfg.user_auth) {
+                    try {
+                        log.info('[createRoom] Checking creator role', {
+                            room_id,
+                            username: creatorUsername,
+                        });
+
+                        const isPeerAdmin = await axios.post(
+                            'https://talk-admin.ssf.gov.bd/api/v1/user/isAdmin',
+                            {
+                                username: creatorUsername,
+                                password: creatorPassword,
+                                api_secret_key:
+                                    hostCfg.users_api_secret_key,
+                            },
+                            {
+                                timeout: hostCfg.users_api_timeout,
+                            }
+                        );
+
+                        log.info('[createRoom] Admin API response', {
+                            room_id,
+                            username: creatorUsername,
+                            status: isPeerAdmin.status,
+                            response: isPeerAdmin.data,
+                        });
+
+                        if (isPeerAdmin.data.message !== true) {
+                            log.warn(
+                                '[createRoom] Non-admin tried to create room',
+                                {
+                                    username: creatorUsername,
+                                    room_id,
+                                }
+                            );
+
+                            return callback({
+                                error: 'Only admin can create rooms',
+                            });
+                        }
+                    } catch (error) {
+                        log.error(
+                            '[createRoom] Admin verification failed',
+                            {
+                                username: creatorUsername,
+                                room_id,
+                                message: error.message,
+                                status:
+                                    error.response?.status || null,
+                                response:
+                                    error.response?.data || null,
+                            }
+                        );
+
+                        return callback({
+                            error: 'Only admin can create rooms',
+                        });
+                    }
+                }
+
+                const ip = getIpSocket(socket);
+
+                if (!checkCreateRoomLimit(ip)) {
+                    log.warn('[createRoom] Rate limit exceeded', {
+                        ip,
+                        room_id,
+                    });
+
+                    return callback({
+                        error:
+                            `Too many room creation requests. ` +
+                            `Please try again after ` +
+                            `${minutesLabel(
+                                createRoomLimiterMinutes
+                            )}.`,
+                    });
+                }
+
+                /*
+                * Create the MiroTalk room first.
+                */
+                try {
+                    const worker = await getMediasoupWorker();
+
+                    roomList.set(
+                        socket.room_id,
+                        new Room(socket.room_id, worker, io)
                     );
 
-                    if (isPeerAdmin.data.message !== true) {
-                        log.warn('[createRoom] - Non-admin tried to create room', { username, room_id });
-                        return callback({ error: 'Only admin can create rooms' });
-                    }
-                } catch (err) {
-                    return callback({ error: 'Only admin can create rooms' });
-                }
-            }
+                    log.info('[createRoom] Room created successfully', {
+                        room_name: socket.room_id,
+                        created_by: creatorUsername,
+                    });
+                } catch (error) {
+                    log.error('[createRoom] Room creation failed', {
+                        room_name: socket.room_id,
+                        created_by: creatorUsername,
+                        message: error.message,
+                    });
 
-            const ip = getIpSocket(socket);
-            if (!checkCreateRoomLimit(ip)) {
-                log.warn('[createRoom] - Rate limit exceeded', { ip, room_id });
+                    return callback({
+                        error: 'Room creation failed',
+                    });
+                }
+
+                /*
+                * Call the room-log API from server.js.
+                */
+                const roomLogResult =
+                    await sendRoomLogToAdmin(
+                        creatorUsername,
+                        socket.room_id
+                    );
+
+                /*
+                * Return both room creation and room-log results
+                * to RoomClient.js.
+                */
                 return callback({
-                    error: `Too many room creation requests. Please try again after ${minutesLabel(createRoomLimiterMinutes)}.`,
+                    room_id: socket.room_id,
+                    room_log: {
+                        attempted: true,
+                        saved: roomLogResult.saved,
+                        status: roomLogResult.status,
+                        message: roomLogResult.message,
+                    },
                 });
             }
-
-            log.debug('Created room', { room_id: socket.room_id });
-
-            const worker = await getMediasoupWorker();
-            roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
-
-            return callback({ room_id: socket.room_id });
-        });
+        );
 
         socket.on('join', async (dataObject, cb) => {
             if (!roomExists(socket)) {
