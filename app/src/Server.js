@@ -294,7 +294,7 @@ const hostCfg = {
     presenters: config?.security?.host?.presenters,
     room_log_api:
     config?.security?.host?.room_log_api ||
-        'http://talk-admin.ssf.gov.bd/api/v1/room-log',
+        'http://localhost:9000/api/v1/room-log',
 
     users_api_timeout:
         config?.security?.host?.users_api_timeout || 5000,
