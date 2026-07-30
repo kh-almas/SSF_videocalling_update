@@ -5053,22 +5053,31 @@ function showButtons() {
 }
 
 function checkButtonsBar() {
+    // Usernames must always remain visible
+    toggleClassElements('username', 'flex');
+
     if (localStorageSettings.keep_buttons_visible) {
         bottomButtons.style.display = 'flex';
-        toggleClassElements('username', 'flex');
-        if (roomNameBadge) roomNameBadge.style.display = 'flex';
+
+        if (roomNameBadge) {
+            roomNameBadge.style.display = 'flex';
+        }
+
         isButtonsVisible = true;
     } else {
         if (!isButtonsBarOver) {
+            // Hide only the control buttons
             bottomButtons.style.display = 'none';
-            toggleClassElements('username', 'none');
-            if (roomNameBadge) roomNameBadge.style.display = 'none';
+
+            if (roomNameBadge) {
+                roomNameBadge.style.display = 'none';
+            }
+
             isButtonsVisible = false;
         }
     }
-    setTimeout(() => {
-        checkButtonsBar();
-    }, 10000);
+
+    setTimeout(checkButtonsBar, 10000);
 }
 
 function toggleClassElements(className, displayState) {
