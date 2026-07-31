@@ -3153,7 +3153,7 @@ class RoomClient {
                 vb.className = 'videoMenuBar hidden';
 
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
-                ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
+                ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode hidden');
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 mv = this.createButton(id + '__mirror', html.mirror);
                 dw = this.createButton(id + '__draw', html.draw);
@@ -3826,7 +3826,7 @@ class RoomClient {
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
-                ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
+                ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode hidden');
 
                 au = this.createButton(
                     remotePeerId + '__audio',
