@@ -5034,6 +5034,36 @@ function handleDropdownHover(dropdownElement = null) {
     });
 }
 
+function setFullscreenVideoBarVisible(isVisible) {
+    const fullscreenElement =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+
+    if (!fullscreenElement) return;
+
+    const fullscreenVideoBar =
+        fullscreenElement.querySelector('.videoMenuBar');
+
+    if (!fullscreenVideoBar) return;
+
+    if (isVisible) {
+        fullscreenVideoBar.classList.remove('hidden');
+        fullscreenVideoBar.style.setProperty(
+            'display',
+            'flex',
+            'important'
+        );
+    } else {
+        fullscreenVideoBar.style.setProperty(
+            'display',
+            'none',
+            'important'
+        );
+    }
+}
+
 function showButtons() {
     if (
         wbIsBgTransparent ||
@@ -5045,6 +5075,7 @@ function showButtons() {
     )
         return;
     bottomButtons.style.display = 'flex';
+    setFullscreenVideoBarVisible(true);
     toggleClassElements('username', 'flex');
 
     if (roomNameBadge) roomNameBadge.style.display = 'flex';
@@ -5058,6 +5089,7 @@ function checkButtonsBar() {
 
     if (localStorageSettings.keep_buttons_visible) {
         bottomButtons.style.display = 'flex';
+        setFullscreenVideoBarVisible(true);
 
         if (roomNameBadge) {
             roomNameBadge.style.display = 'flex';
@@ -5068,6 +5100,7 @@ function checkButtonsBar() {
         if (!isButtonsBarOver) {
             // Hide only the control buttons
             bottomButtons.style.display = 'none';
+            setFullscreenVideoBarVisible(false);
 
             if (roomNameBadge) {
                 roomNameBadge.style.display = 'none';
@@ -5077,7 +5110,7 @@ function checkButtonsBar() {
         }
     }
 
-    setTimeout(checkButtonsBar, 10000);
+    setTimeout(checkButtonsBar, 3000);
 }
 
 function toggleClassElements(className, displayState) {

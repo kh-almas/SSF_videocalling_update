@@ -5812,6 +5812,8 @@ class RoomClient {
                 this.isVideoOnFullScreen = false;
                 btnFs.className = html.fullScreen;
 
+                videoBar?.style.removeProperty('display');
+
                 if (dropdownLabel) {
                     dropdownLabel.textContent = 'Full Screen';
                 }
