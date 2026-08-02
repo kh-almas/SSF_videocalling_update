@@ -2677,6 +2677,7 @@ function startServer() {
             } = data.peer_info;
 
             let is_presenter =false;
+            let authenticatedUsername = '';
 
             // User Auth required or detect token, we check if peer valid
             if (hostCfg.user_auth || peer_token) {
@@ -2699,6 +2700,8 @@ function startServer() {
                             log.warn('[Join] - Invalid peer not authenticated', isPeerValid);
                             return cb('unauthorized');
                         }
+
+                        authenticatedUsername = String(username || '').trim().toLowerCase();
 
                         const tokenPresenter = presenter === '1' || presenter === 'true';
 
@@ -2756,6 +2759,30 @@ function startServer() {
                 return cb('isBanned');
             }
 
+            if (authenticatedUsername) {
+                const duplicateAccountSocket = Array.from(
+                    io.sockets.sockets.values()
+                ).find((connectedSocket) => {
+                    return (
+                        connectedSocket.id !== socket.id &&
+                        connectedSocket.authenticatedUsername ===
+                            authenticatedUsername
+                    );
+                });
+
+                if (duplicateAccountSocket) {
+                    log.warn('[Join] - Account already connected', {
+                        username: authenticatedUsername,
+                        existing_socket_id: duplicateAccountSocket.id,
+                        attempted_socket_id: socket.id,
+                    });
+
+                    return cb('accountAlreadyActive');
+                }
+
+                socket.authenticatedUsername = authenticatedUsername;
+            }
+  
             // Remove old peer with same socket.id before adding new one
             const existingPeer = room.getPeer(socket.id);
             if (existingPeer) {
@@ -2976,7 +3003,7 @@ function startServer() {
                 delete presenters[socket.room_id][targetPeerUUID];
             }
 
-            targetPeer.updatePeerInfo({
+        argetPeer.updatePeerInfo({
                 type: 'presenter',
                 status: makePresenter,
             });
@@ -5156,6 +5183,7 @@ function startServer() {
         });
 
         socket.on('disconnect', (reason) => {
+            socket.authenticatedUsername = null;
             if (!roomExists(socket)) {
                 // Clean up socket listeners even if room doesn't exist
                 socket.removeAllListeners();
@@ -5293,6 +5321,8 @@ function startServer() {
             }
 
             removeIP(socket);
+
+            socket.authenticatedUsername = null;
 
             socket.room_id = null;
 

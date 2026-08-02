@@ -585,6 +585,24 @@ class RoomClient {
                     return this.userRoomNotAllowed();
                 }
 
+                if (room === 'accountAlreadyActive') {
+                    console.warn(
+                        'This account is already connected on another device'
+                    );
+
+                    endRoomSession();
+
+                    return popupHtmlMessage(
+                        null,
+                        image.forbidden,
+                        'Account Already Active',
+                        'This account is already connected on another device.',
+                        'center',
+                        '/',
+                        false
+                    );
+                }
+
                 if (room === 'unauthorized') {
                     console.warn(
                         '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password'
