@@ -341,6 +341,17 @@ const pickr = Pickr.create({
 const participantsCountBadge = getId('participantsCountBadge');
 const recordingToggleButton = getId('recordingToggleButton');
 const recordingImageElement = getId('recordingImage');
+
+const recordingDropdown = getId('recordingDropdown');
+const recordingMenu = getId('recordingMenu');
+const recordingMenuTime = getId('recordingMenuTime');
+const recordingMenuStatus = getId('recordingMenuStatus');
+const recordingMenuStartBtn = getId('recordingMenuStartBtn');
+const recordingMenuPauseBtn = getId('recordingMenuPauseBtn');
+const recordingMenuResumeBtn = getId('recordingMenuResumeBtn');
+const recordingMenuStopBtn = getId('recordingMenuStopBtn');
+const recordingStatusElement = getId('recordingStatus');
+
 const roomRecordingSignal = getId('roomRecordingSignal');
 const roomRecordingSignalText = getId('roomRecordingSignalText');
 
@@ -718,7 +729,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
         setTippy('chatButton', 'Chat', bPlacement);
         setTippy('participantsButton', 'Participants list', bPlacement);
-        setTippy('recordingToggleButton','Start or stop recording',bPlacement);
+        setTippy('recordingToggleButton','Recording controls',bPlacement);
         // setTippy('settingsButton', 'Toggle the settings', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
@@ -2449,48 +2460,126 @@ function secondsToHms(d) {
     return hDisplay + ' ' + mDisplay + ' ' + sDisplay;
 }
 
+
+
+function updateRecordingTimerText(elapsedText) {
+    recordingStatusElement.innerText = elapsedText;
+
+    if (recordingMenuStatus) {
+        recordingMenuStatus.innerText = elapsedText;
+    }
+}
+
 function startRecordingTimer() {
     recElapsedTime = 0;
+    updateRecordingTimerText('0s');
+
     recTimer = setInterval(function printTime() {
-        if (rc.isRecording()) {
-            recElapsedTime++;
-            recordingStatus.innerText = secondsToHms(recElapsedTime);
-            rc._getRecIndicators().forEach((el) => {
-                el.innerHTML = '🔴 ' + (recordingStatus.innerText !== '0s' ? recordingStatus.innerText : 'REC');
-            });
-        }
+        // While paused, isRecording() is false, so the timer stays frozen.
+        if (!rc.isRecording()) return;
+
+        recElapsedTime++;
+
+        const elapsedText = secondsToHms(recElapsedTime);
+
+        updateRecordingTimerText(elapsedText);
+
+        rc._getRecIndicators().forEach((recordingIndicator) => {
+            recordingIndicator.innerHTML =
+                '🔴 ' + (elapsedText !== '0s' ? elapsedText : 'REC');
+        });
     }, 1000);
 }
+
 function stopRecordingTimer() {
     clearInterval(recTimer);
-    recordingStatus.innerText = '0s';
+    updateRecordingTimerText('0s');
 }
 
-/**
- * Synchronize the toolbar recording button and original recording image.
- */
+function syncRecordingMenuControls(active, paused = false) {
+    active
+        ? hide(recordingMenuStartBtn)
+        : show(recordingMenuStartBtn);
+
+    active && !paused
+        ? show(recordingMenuPauseBtn)
+        : hide(recordingMenuPauseBtn);
+
+    active && paused
+        ? show(recordingMenuResumeBtn)
+        : hide(recordingMenuResumeBtn);
+
+    active
+        ? show(recordingMenuStopBtn)
+        : hide(recordingMenuStopBtn);
+
+    active
+        ? show(recordingMenuTime)
+        : hide(recordingMenuTime);
+
+    if (recordingMenuStatus && recordingStatusElement) {
+        recordingMenuStatus.innerText =
+            recordingStatusElement.innerText || '0s';
+    }
+}
+
 function syncLocalRecordingControls(active, paused = false) {
-    recordingToggleButton.classList.toggle('recording-active', active);
-    recordingToggleButton.classList.toggle('recording-paused', active && paused);
+    recordingToggleButton.classList.toggle(
+        'recording-active',
+        active
+    );
 
-    recordingImageElement.classList.toggle('recording-active', active);
-    recordingImageElement.classList.toggle('recording-paused', active && paused);
+    recordingToggleButton.classList.toggle(
+        'recording-paused',
+        active && paused
+    );
 
-    recordingToggleButton.setAttribute('aria-pressed', String(active));
+    recordingImageElement.classList.toggle(
+        'recording-active',
+        active
+    );
 
-    const label = active ? 'Stop recording' : 'Start recording';
+    recordingImageElement.classList.toggle(
+        'recording-paused',
+        active && paused
+    );
 
-    recordingToggleButton.setAttribute('aria-label', label);
-    recordingToggleButton.setAttribute('title', label);
-    recordingImageElement.setAttribute('title', label);
+    recordingToggleButton.setAttribute(
+        'aria-pressed',
+        String(active)
+    );
 
-    const icon = recordingToggleButton.querySelector('i');
+    const toolbarLabel = active
+        ? paused
+            ? 'Recording paused - open controls'
+            : 'Recording active - open controls'
+        : 'Open recording controls';
 
-    if (icon) {
-        icon.className = active
+    recordingToggleButton.setAttribute(
+        'aria-label',
+        toolbarLabel
+    );
+
+    recordingToggleButton.setAttribute(
+        'title',
+        toolbarLabel
+    );
+
+    recordingImageElement.setAttribute(
+        'title',
+        active ? 'Stop recording' : 'Start recording'
+    );
+
+    const recordingIcon =
+        recordingToggleButton.querySelector('i');
+
+    if (recordingIcon) {
+        recordingIcon.className = active
             ? 'fas fa-stop-circle'
             : 'fas fa-record-vinyl';
     }
+
+    syncRecordingMenuControls(active, paused);
 }
 
 /**
@@ -3029,11 +3118,24 @@ function handleButtons() {
             : startRecButton.click();
     }
 
-    /*
-    * Both controls now execute exactly the same function.
-    */
-    recordingImage.onclick = toggleRoomRecording;
-    recordingToggleButton.onclick = toggleRoomRecording;
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // The original image keeps its direct start/stop behaviour.
+    recordingImageElement.onclick = toggleRoomRecording;
+
+    // The toolbar button now opens the recording dropdown.
+    recordingToggleButton.onclick = toggleRecordingMenu;
 
     startRecButton.onclick = () => {
         rc.startRecording();
@@ -3042,12 +3144,47 @@ function handleButtons() {
     stopRecButton.onclick = () => {
         rc.stopRecording();
     };
+
     pauseRecButton.onclick = () => {
         rc.pauseRecording();
     };
+
     resumeRecButton.onclick = () => {
         rc.resumeRecording();
     };
+
+    // Reuse the original recording controls.
+    recordingMenuStartBtn.onclick = () => {
+        setRecordingMenuVisibility(false);
+        startRecButton.click();
+    };
+
+    recordingMenuPauseBtn.onclick = () => {
+        pauseRecButton.click();
+    };
+
+    recordingMenuResumeBtn.onclick = () => {
+        resumeRecButton.click();
+    };
+
+    recordingMenuStopBtn.onclick = () => {
+        stopRecButton.click();
+    };
+
+    document.addEventListener(
+        'click',
+        handleRecordingMenuOutsideClick
+    );
+
+
+
+
+
+
+
+
+
+
     swapCameraButton.onclick = () => {
         if (isHideMeActive) rc.handleHideMe();
         rc.closeThenProduce(RoomClient.mediaType.video, null, true);
@@ -4796,6 +4933,7 @@ function handleRoomClientEvents() {
             }
             hide(startRecButton);
             hide(recordingImage);
+            setRecordingMenuVisibility(false);
             hide(recordingToggleButton);
             hide(roomHostOnlyRecording);
             hide(roomRecordingOptions);
@@ -8858,11 +8996,75 @@ function updateTimerDisplay(el, seconds) {
     }
 }
 
+
+
+
+// ####################################################
+// RECORDING MENU
+// ####################################################
+
+function setRecordingMenuVisibility(visible) {
+    if (!recordingMenu) return;
+
+    visible
+        ? show(recordingMenu)
+        : hide(recordingMenu);
+
+    recordingToggleButton.setAttribute(
+        'aria-expanded',
+        String(visible)
+    );
+}
+
+function toggleRecordingMenu() {
+    if (!recordingMenu) return;
+
+    if (
+        isRulesActive &&
+        !isPresenter &&
+        hostOnlyRecording
+    ) {
+        userLog(
+            'warning',
+            'Only the presenter can record this meeting',
+            'top-end',
+            5000
+        );
+
+        return;
+    }
+
+    // Do not keep both bottom dropdowns open.
+    if (exitMenu) {
+        hide(exitMenu);
+    }
+
+    const shouldOpen =
+        recordingMenu.classList.contains('hidden');
+
+    setRecordingMenuVisibility(shouldOpen);
+}
+
+function handleRecordingMenuOutsideClick(event) {
+    if (!recordingDropdown || !recordingMenu) return;
+
+    if (recordingMenu.classList.contains('hidden')) return;
+
+    if (!recordingDropdown.contains(event.target)) {
+        setRecordingMenuVisibility(false);
+    }
+}
+
+
+
+
 // ####################################################
 // EXIT MENU
 // ####################################################
 
 function toggleExitMenu() {
+    setRecordingMenuVisibility(false);
+
     if (!exitMenu) return leaveRoom();
     // Non-presenters skip the dropdown and leave the room directly
     if (!isPresenter) {
