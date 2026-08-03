@@ -1,13 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <!-- Title and Icon -->
-
-        <title id="title">MiroTalk SFU - Room Video Calls, Messaging and Screen Sharing.</title>
-        <link id="icon" rel="shortcut icon" href="../images/logo.svg" />
-        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.svg" />
-
-        <!-- Meta Information -->
+        <!-- Core metadata -->
 
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -15,20 +9,131 @@
             name="viewport"
             content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
         />
+
+        <title id="title">SSF Talk | Secure Online Meeting</title>
+
         <meta
             id="description"
             name="description"
-            content="MiroTalk SFU powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser."
+            content="Join a secure SSF Talk online meeting with real-time video, audio, screen sharing, chat and collaboration."
+        />
+        <meta
+            name="keywords"
+            content="SSF Talk, secure online meeting, video conference, video call, screen sharing, online collaboration"
+        />
+        <meta name="author" content="SSF" />
+        <meta name="application-name" content="SSF Talk" />
+        <meta name="color-scheme" content="dark light" />
+        <meta name="theme-color" content="#1f2937" />
+
+        <!-- Browser and mobile icons -->
+
+        <link
+            id="icon"
+            rel="icon"
+            type="image/png"
+            href="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <link
+            rel="shortcut icon"
+            type="image/png"
+            href="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <link
+            id="appleTouchIcon"
+            rel="apple-touch-icon"
+            href="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <link
+            rel="image_src"
+            href="https://talk.ssf.gov.bd/images/ssf_wing.png"
         />
 
-        <!-- https://ogp.me -->
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="SSF Talk" />
+        <meta name="mobile-web-app-capable" content="yes" />
 
-        <meta property="og:type" content="{{OG_TYPE}}" />
-        <meta property="og:site_name" content="{{OG_SITE_NAME}}" />
-        <meta property="og:title" content="{{OG_TITLE}}" />
-        <meta property="og:description" content="{{OG_DESCRIPTION}}" />
-        <meta property="og:image" content="{{OG_IMAGE}}" />
-        <meta property="og:url" content="{{OG_URL}}" />
+        <meta name="msapplication-TileColor" content="#1f2937" />
+        <meta
+            name="msapplication-TileImage"
+            content="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+
+        <!-- Open Graph:
+            Facebook, Messenger, WhatsApp, LinkedIn,
+            Telegram, Discord, Slack and other applications -->
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="SSF Talk" />
+        <meta
+            property="og:title"
+            content="Join an SSF Talk Meeting"
+        />
+        <meta
+            property="og:description"
+            content="Join a secure online meeting with real-time video, audio, screen sharing, chat and collaboration."
+        />
+        <meta property="og:url" content="https://talk.ssf.gov.bd/" />
+
+        <meta
+            property="og:image"
+            content="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <meta
+            property="og:image:url"
+            content="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <meta
+            property="og:image:secure_url"
+            content="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <meta property="og:image:type" content="image/png" />
+        <meta
+            property="og:image:alt"
+            content="SSF Talk logo"
+        />
+        <meta property="og:locale" content="en_US" />
+
+        <!-- X/Twitter -->
+
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:domain" content="talk.ssf.gov.bd" />
+        <meta name="twitter:url" content="https://talk.ssf.gov.bd/" />
+        <meta
+            name="twitter:title"
+            content="Join an SSF Talk Meeting"
+        />
+        <meta
+            name="twitter:description"
+            content="Join a secure online meeting with real-time video, audio, screen sharing, chat and collaboration."
+        />
+        <meta
+            name="twitter:image"
+            content="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
+        <meta
+            name="twitter:image:alt"
+            content="SSF Talk logo"
+        />
+
+        <!-- Generic link-preview fallback -->
+
+        <meta
+            itemprop="name"
+            content="Join an SSF Talk Meeting"
+        />
+        <meta
+            itemprop="description"
+            content="Join a secure online meeting with real-time video, audio, screen sharing, chat and collaboration."
+        />
+        <meta
+            itemprop="image"
+            content="https://talk.ssf.gov.bd/images/ssf_wing.png"
+        />
 
         <!-- StyleSheet -->
         <link rel="stylesheet" href="../css/Root.css" />
