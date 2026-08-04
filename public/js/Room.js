@@ -7054,7 +7054,7 @@ function getParticipantsList(peers) {
 
         menuItems += renderParticipantMenuItem(
             renderParticipantActionButton({
-                buttonClass: 'btn-sm ml5',
+                buttonClass: 'btn-sm ml5 hidden',
                 buttonId: 'sendVideoToAll',
                 onClick: `rc.shareVideo('all');`,
                 iconHtml: _PEER.sendVideo,
@@ -7174,7 +7174,7 @@ function getParticipantsList(peers) {
 
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
-                        buttonClass: 'btn-sm ml5',
+                        buttonClass: 'btn-sm ml5 hidden',
                         buttonId: `${peer_id}___sendVideoTo`,
                         onClick: `rc.shareVideo('${peer_id}', ${JSON.stringify(peer_name)});`,
                         iconHtml: _PEER.sendVideo,
@@ -7198,7 +7198,7 @@ function getParticipantsList(peers) {
                 if (BUTTONS.participantsList.geoLocationButton) {
                     menuItems += renderParticipantMenuItem(
                         renderParticipantActionButton({
-                            buttonClass: 'btn-sm ml5',
+                            buttonClass: 'btn-sm ml5 hidden',
                             buttonId: `${peer_id}___geoLocation`,
                             onClick: `rc.askPeerGeoLocation(this.id)`,
                             iconHtml: peer_geoLocation,
@@ -7286,7 +7286,7 @@ function getParticipantsList(peers) {
 
                     menuItems += renderParticipantMenuItem(
                         renderParticipantActionButton({
-                            buttonClass: 'btn-sm ml5',
+                            buttonClass: 'btn-sm ml5 hidden',
                             buttonId: `${peer_id}___sendVideoTo`,
                             onClick: `rc.shareVideo('${peer_id}', ${JSON.stringify(peer_name)});`,
                             iconHtml: _PEER.sendVideo,
