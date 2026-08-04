@@ -55,9 +55,9 @@ let BRAND = {
         joinLastLabel: 'Your recent room:',
     },
     site: {
-        title: 'SSF Video Calling, Video Calls, Messaging and Screen Sharing',
-        icon: '../images/logo.svg',
-        appleTouchIcon: '../images/logo.svg',
+        title: 'SSF Talk | Secure Online Meeting',
+        icon: 'https://talk.ssf.gov.bd/images/ssf_wing.png',
+        appleTouchIcon: 'https://talk.ssf.gov.bd/images/ssf_wing.png',
         newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
         newRoomDescription:
             "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
