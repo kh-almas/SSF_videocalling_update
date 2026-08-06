@@ -7137,6 +7137,7 @@ function getParticipantsList(peers) {
 
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
+                        buttonClass: 'hidden',
                         buttonId: `${peer_id}___pAudioMute`,
                         onClick: `rc.peerAction('me',this.id,'mute')`,
                         iconHtml: _PEER.audioOn,
@@ -7145,6 +7146,7 @@ function getParticipantsList(peers) {
                 );
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
+                        buttonClass: 'hidden',
                         buttonId: `${peer_id}___pVideoHide`,
                         onClick: `rc.peerAction('me',this.id,'hide')`,
                         iconHtml: _PEER.videoOn,
@@ -7153,6 +7155,7 @@ function getParticipantsList(peers) {
                 );
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
+                        buttonClass: 'hidden',
                         buttonId: `${peer_id}___pScreenStop`,
                         onClick: `rc.peerAction('me',this.id,'stop')`,
                         iconHtml: _PEER.screenOn,

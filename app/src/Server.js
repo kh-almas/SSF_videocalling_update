@@ -3003,7 +3003,7 @@ function startServer() {
                 delete presenters[socket.room_id][targetPeerUUID];
             }
 
-        argetPeer.updatePeerInfo({
+        targetPeer.updatePeerInfo({
                 type: 'presenter',
                 status: makePresenter,
             });
