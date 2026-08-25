@@ -101,7 +101,7 @@ let BUTTONS = {
         ejectButton: true, // presenter
     },
     chat: {
-        chatPinButton: true,
+        chatPinButton: false,
         chatMaxButton: false,
         chatSaveButton: true,
         chatEmojiButton: true,
@@ -256,9 +256,9 @@ function handleRules(isPresenter) {
     }
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
-    BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
-    BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
-    BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
+    BUTTONS.settings.broadcastingButton ? hide(broadcastingButton) : hide(broadcastingButton);
+    BUTTONS.settings.lobbyButton ? hide(lobbyButton) : hide(lobbyButton);
+    BUTTONS.settings.sendEmailInvitation ? hide(sendEmailInvitation) : hide(sendEmailInvitation);
     BUTTONS.settings.micOptionsButton ? show(micOptionsButton) : hide(micOptionsButton);
     BUTTONS.settings.tabNotificationsBtn ? show(tabNotificationsBtn) : hide(tabNotificationsBtn);
     BUTTONS.settings.tabModerator ? show(tabModeratorBtn) : hide(tabModeratorBtn);

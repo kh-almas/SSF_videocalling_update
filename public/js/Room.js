@@ -2064,7 +2064,7 @@ function roomIsReady() {
             }
             BUTTONS.main.snapshotRoomButton && show(snapshotRoomButton);
         }
-        BUTTONS.chat.chatPinButton && !isMobileDevice && show(chatTogglePin);
+        BUTTONS.chat.chatPinButton && !isMobileDevice && hide(chatTogglePin);
         // BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         BUTTONS.poll.pollPinButton && show(pollTogglePin);
         show(editorTogglePin);
@@ -2101,9 +2101,9 @@ function roomIsReady() {
     BUTTONS.settings.activeRooms && show(activeRoomsButton);
     BUTTONS.settings.fileSharing && show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
-    BUTTONS.settings.broadcastingButton && show(broadcastingButton);
-    BUTTONS.settings.lobbyButton && show(lobbyButton);
-    BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
+    hide(broadcastingButton);
+    BUTTONS.settings.lobbyButton && hide(lobbyButton);
+    BUTTONS.settings.sendEmailInvitation && hide(sendEmailInvitation);
     !BUTTONS.settings.customNoiseSuppression && hide(noiseSuppressionButton);
     BUTTONS.settings.tabNotificationsBtn && show(tabNotificationsBtn);
     if (rc.recording.recSyncServerRecording) show(roomRecordingServer);
