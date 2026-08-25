@@ -1158,7 +1158,8 @@ function isPeerPresenter() {
 }
 
 function getPeerName() {
-    const name = getQueryParam('name');
+    const storedName = window.localStorage.getItem('peer_name');
+    const name = storedName ? filterXSS(storedName.trim()) : getQueryParam('name');
     if (isHtml(name)) {
         console.log('Direct join', { name: 'Invalid name' });
         return 'Invalid name';
