@@ -2731,7 +2731,13 @@ function startServer() {
                         return cb('unauthorized');
                     }
                 } else {
-                    if (!hostCfg.users_from_db) return cb('unauthorized');
+                    log.warn('[Join] - Authentication token is missing', {
+                        room_id: room.id,
+                        peer_name: peer_name,
+                        users_from_db: hostCfg.users_from_db,
+                    });
+
+                    return cb('unauthorized');
                 }
 
                 if (!hostCfg.users_from_db) {

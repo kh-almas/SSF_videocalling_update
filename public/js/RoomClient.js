@@ -10770,22 +10770,13 @@ class RoomClient {
     }
 
     userUnauthorized() {
-        this.sound('alert');
-        Swal.fire({
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            background: swalBackground,
-            imageUrl: image.forbidden,
-            title: 'Oops, Unauthorized',
-            text: 'The host has user authentication enabled',
-            confirmButtonText: `Login`,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then(() => {
-            // Login required to join room
-            endRoomSession();
-            openURL(`/login/?room=${this.room_id}`);
-        });
+        console.warn('Authentication is required to join room:', this.room_id);
+
+        endRoomSession();
+
+        window.location.replace(
+            '/login?room=' + encodeURIComponent(this.room_id)
+        );
     }
 
     roomCreateDenied(message) {
