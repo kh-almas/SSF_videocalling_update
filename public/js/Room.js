@@ -582,6 +582,18 @@ function initDocumentListener() {
 }
 
 async function initClient() {
+    // HOST_USER_AUTH=true: login before showing the pre-join interface
+    if (!peer_token) {
+        console.log('Authentication required. Redirecting to login...', {
+            room: room_id,
+        });
+
+        window.location.replace(
+            '/login?room=' + encodeURIComponent(room_id)
+        );
+        return;
+    }
+
     await getThemes();
     setTheme();
 
