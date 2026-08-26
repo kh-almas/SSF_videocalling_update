@@ -140,20 +140,29 @@ function login() {
                 password: password,
             })
             .then(function (response) {
-                console.log(response);
-
-                // Store in session
+                // Store authenticated login information in this browser tab
                 const token = response.data.message;
-                window.sessionStorage.peer_token = token;
+                const authenticatedPeerName = filterXSS(
+                    String(response.data.displayname || username).trim()
+                );
 
-                // Redirect to room if specified in URL
+                window.sessionStorage.setItem('peer_token', token);
+                window.sessionStorage.setItem('authenticated_peer_name', authenticatedPeerName);
+
+                // Redirect to the requested room
                 if (room) {
-                    window.location.href = '/join/' + window.location.search;
+                    const joinParams = new URLSearchParams(window.location.search);
+
+                    // Never carry the guest URL name after authenticated login
+                    joinParams.delete('name');
+
+                    window.location.href = '/join/?' + joinParams.toString();
                     return;
                 }
-                // Redirect to room if specified in path
+
+                // Redirect when room is provided as /login/room-id
                 if (roomPath && roomPath !== 'login') {
-                    window.location.href = '/join/' + roomPath;
+                    window.location.href = '/join/' + encodeURIComponent(roomPath);
                     return;
                 }
 
