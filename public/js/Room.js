@@ -441,7 +441,7 @@ let chatMessagesId = 0;
 let room_id = getRoomId();
 let room_password = getRoomPassword();
 let room_duration = getRoomDuration();
-let peer_name = getPeerName();
+let peer_name = null;
 let peer_avatar = getPeerAvatar();
 let hasTemporaryAvatar = !!(
     peer_avatar &&
@@ -1445,6 +1445,18 @@ async function whoAreYou() {
         show(initVirtualBackgroundButton);
         show(videoVirtualBackground);
     }
+
+    // Read the existing authenticated name immediately before joining
+    const storedPeerName = window.localStorage.getItem('peer_name');
+
+    if (storedPeerName && storedPeerName.trim()) {
+        peer_name = filterXSS(storedPeerName.trim());
+    }
+
+    console.log('Peer name used for joining:', {
+        localStorageName: storedPeerName,
+        peerName: peer_name,
+    });
 
     if (peer_name) {
         hide(loadingDiv);
